@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>{{ article['title'] }}</title>
+<style>
+/* Обновлённые стили для современного вида */
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%); /* Градиентный фон для глубины */
+    margin: 0;
+    padding: 0;
+    color: #333;
+    line-height: 1.6;
+}
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background: #007bff;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.back-link:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.back-link::before {
+    content: "← ";
+    font-weight: bold;
+}
+h1 {
+    margin-bottom: 15px;
+    font-size: 2.2em;
+    color: #2c3e50;
+    font-weight: 300;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    line-height: 1.3;
+}
+.meta {
+    color: #6c757d;
+    font-size: 0.95em;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+.meta span {
+    display: flex;
+    align-items: center;
+}
+.meta span::before {
+    margin-right: 5px;
+    font-size: 1.1em;
+}
+.meta .source::before { content: "🌐"; } /* Иконка для источника */
+.meta .author::before { content: "👤"; } /* Иконка для автора */
+.meta .date::before { content: "📅"; } /* Иконка для даты */
+.content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    line-height: 1.8;
+    font-size: 1.1em;
+    animation: fadeIn 0.6s ease;
+}
+.content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+.content p, .content ul, .content ol {
+    margin-bottom: 15px;
+}
+.content h2, .content h3 {
+    color: #495057;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* Отзывчивость для мобильных */
+@media (max-width: 768px) {
+    .container { padding: 15px; }
+    h1 { font-size: 1.8em; }
+    .content { padding: 20px; font-size: 1em; }
+    .meta { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <a href="{{ url_for('index') }}" class="back-link">Назад к списку статей</a> <!-- Улучшенная ссылка как кнопка -->
+    <h1>{{ article['title'] }}</h1>
+    <p class="meta">
+        <span class="source">Источник: {{ article['site'] }}</span> |
+        <span class="author">Автор: {{ article['author'] }}</span> |
+        <span class="date">Дата: {{ article['pubDate'] }}</span>
+    </p>
+
+    <div class="content">
+        {{ article['bodyHtml'] | safe }}
+    </div>
+</div>
+</body>
+</html>
