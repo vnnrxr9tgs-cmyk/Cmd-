@@ -1,0 +1,40 @@
+from flask import Flask, render_template, abort
+import json
+import os
+
+app = Flask(__name__)
+ARTICLES_DIR = "articles_data_old"
+
+def load_articles():
+    articles = []
+    if not os.path.exists(ARTICLES_DIR):
+        return articles
+    for file in os.listdir(ARTICLES_DIR):
+        if file.endswith(".json"):
+            try:
+                with open(os.path.join(ARTICLES_DIR, file), "r", encoding="utf-8") as f:
+                    articles.append(json.load(f))
+            except:
+                continue
+    # Сортировка по дате
+    articles.sort(key=lambda x: x['pubDate'], reverse=True)
+    return articles
+
+@app.route("/")
+def index():
+    articles = load_articles()
+    # Фильтруем по сайту для вкладок
+    habr_articles = [a for a in articles if a['site'] == 'habr']
+    tproger_articles = [a for a in articles if a['site'] == 'tproger']
+    return render_template("index.html", habr_articles=habr_articles, tproger_articles=tproger_articles)
+
+@app.route("/article/<int:article_id>")
+def article_page(article_id):
+    articles_data = load_articles()
+    article = next((a for a in articles_data if a['id'] == article_id), None)
+    if not article:
+        abort(404)
+    return render_template("article.html", article=article)
+
+if __name__ == "__main__":
+    app.run(debug=True)

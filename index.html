@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Статьи</title>
+<style>
+/* Обновлённые стили для современного вида */
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%); /* Градиентный фон для глубины */
+    margin: 0;
+    padding: 0;
+    color: #333;
+    line-height: 1.6;
+}
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+    font-size: 2.5em;
+    font-weight: 300;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Лёгкая тень для заголовка */
+}
+.tabs {
+    display: flex;
+    margin-bottom: 30px;
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 15px 20px;
+    background: #e9ecef;
+    transition: all 0.3s ease; /* Плавные переходы */
+    font-weight: 500;
+    color: #495057;
+}
+.tab:hover {
+    background: #dee2e6;
+}
+.tab.active {
+    background: #fff;
+    font-weight: bold;
+    color: #007bff;
+    border-bottom: 3px solid #007bff; /* Акцентная линия */
+}
+.tab-content {
+    display: none;
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    animation: fadeIn 0.5s ease; /* Анимация появления */
+}
+.tab-content.active {
+    display: block;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.article {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-left: 4px solid #007bff; /* Акцентная полоса */
+    background: #f8f9fa;
+    border-radius: 6px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.article:hover {
+    transform: translateY(-2px); /* Лёгкий подъём при наведении */
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+.article h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.3em;
+    font-weight: 600;
+}
+.article a {
+    text-decoration: none;
+    color: #007bff;
+    transition: color 0.3s ease;
+}
+.article a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+.meta {
+    color: #6c757d;
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+.meta::before {
+    content: "📅"; /* Иконка для мета-информации */
+    margin-right: 5px;
+}
+/* Отзывчивость для мобильных */
+@media (max-width: 768px) {
+    .tabs { flex-direction: column; }
+    .tab { padding: 12px; }
+    h1 { font-size: 2em; }
+    .container { padding: 15px; }
+    .tab-content { padding: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Свежие статьи из IT-сообщества</h1> <!-- Улучшенный заголовок для привлекательности -->
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('habr')">Habr</div>
+        <div class="tab" onclick="showTab('tproger')">TProger</div>
+    </div>
+
+    <div id="habr" class="tab-content active">
+        {% for article in habr_articles %}
+        <div class="article">
+            <h2><a href="{{ url_for('article_page', article_id=article['id']) }}">{{ article['title'] }}</a></h2>
+            <p class="meta">Автор: {{ article['author'] }} | Дата: {{ article['pubDate'] }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="tproger" class="tab-content">
+        {% for article in tproger_articles %}
+        <div class="article">
+            <h2><a href="{{ url_for('article_page', article_id=article['id']) }}">{{ article['title'] }}</a></h2>
+            <p class="meta">Автор: {{ article['author'] }} | Дата: {{ article['pubDate'] }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function showTab(tabId) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+</script>
+</body>
+</html>
