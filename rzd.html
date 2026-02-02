@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Статистика</title>
+
+<style>
+:root {
+    --green-bg: linear-gradient(90deg, #ecfdf5, #ffffff);
+    --blue-bg: linear-gradient(90deg, #eff6ff, #ffffff);
+    --border: #e5e7eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --pos: #16a34a;
+    --neg: #dc2626;
+}
+
+body {
+    background: #f6f7fb;
+    font-family: system-ui, sans-serif;
+    padding: 24px;
+    color: var(--text);
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+input {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+button {
+    padding: 6px 12px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.table-wrap {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 10px 20px rgba(0,0,0,.05);
+    max-width: 950px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+}
+
+th, td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+th {
+    text-align: left;
+    position: relative;
+}
+
+/* Увеличение расстояния между 5-м и 6-м столбцами */
+th:nth-child(5), td:nth-child(5) {
+    padding-right: 20px;
+}
+th:nth-child(6), td:nth-child(6) {
+    padding-left: 20px;
+}
+
+.num { text-align: right; }
+.left { text-align: left; }
+
+.percent {
+    font-size: 11px;
+    margin-left: 6px;
+}
+
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+
+.filter-btn {
+    font-size: 10px;
+    cursor: pointer;
+    margin-left: 4px;
+    color: var(--muted);
+}
+
+.filter-box {
+    position: absolute;
+    top: 22px;
+    left: 0;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px;
+    display: none;
+    z-index: 10;
+}
+.filter-box div {
+    padding: 4px 6px;
+    cursor: pointer;
+}
+.filter-box div:hover {
+    background: #f1f5f9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="controls">
+    <button onclick="location.reload()">🔄 Обновить</button>
+    <input id="search" placeholder="Поиск…" onkeyup="searchTable()">
+    <button onclick="resetSearch()">✖ Сброс</button>
+</div>
+
+<div class="table-wrap">
+<table id="table">
+<thead>
+<tr>
+    <th>
+        №
+        <span class="filter-btn" onclick="toggleFilter()">▼</span>
+        <div class="filter-box" id="filterBox"></div>
+    </th>
+    <th>Продукт</th>
+    <th>Код A</th>
+    <th>Код B</th>
+    <th class="num">Значение 1</th>
+    <th class="left">Значение 2</th>
+    <th class="num">Сумма</th>
+</tr>
+</thead>
+
+<tbody>
+{% set p1 = None %}
+{% set p2 = None %}
+{% set p3 = None %}
+{% set col1_values = [] %}
+
+{% for r in rzd %}
+{% set diff = ((r.col6 - r.col5) / r.col5 * 100) if r.col5 != 0 else 0 %}
+{% if r.col1 not in col1_values %}{% set _ = col1_values.append(r.col1) %}{% endif %}
+
+<tr data-col1="{{ r.col1 }}"
+ style="{% if r.col1 == 1 %}background:var(--green-bg){% elif r.col1 == 2 %}background:var(--blue-bg){% endif %}">
+
+<td>{% if r.col1 != p1 %}{{ r.col1 }}{% endif %}</td>
+<td>{% if r.col2 != p2 %}{{ r.col2 }}{% endif %}</td>
+<td>{% if r.col3 != p3 %}{{ r.col3 }}{% endif %}</td>
+<td>{{ r.col4 }}</td>
+
+<td class="num">{{ r.col5 }}</td>
+<td class="left">
+    {{ r.col6 }}
+    <span class="percent {% if diff >= 0 %}pos{% else %}neg{% endif %}">
+        {{ "%.1f"|format(diff) }}%
+    </span>
+</td>
+<td class="num">{{ r.col7 }}</td>
+</tr>
+
+{% set p1 = r.col1 %}
+{% set p2 = r.col2 %}
+{% set p3 = r.col3 %}
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<script>
+const rows = document.querySelectorAll("tbody tr");
+const filterBox = document.getElementById("filterBox");
+const search = document.getElementById("search");  // Добавлено: определение переменной search
+
+// генерация фильтра из данных
+[...new Set([...rows].map(r => r.dataset.col1))].forEach(v => {
+    filterBox.innerHTML += `<div onclick="filterCol('${v}')">${v}</div>`;  // Исправлено: шаблонная строка и кавычки вокруг v
+});
+filterBox.innerHTML += `<div onclick="filterCol('all')">Все</div>`;  // Исправлено: шаблонная строка
+
+function toggleFilter() {
+    filterBox.style.display = filterBox.style.display === "block" ? "none" : "block";
+}
+
+function filterCol(val) {
+    rows.forEach(r => {
+        r.style.display = (val === 'all' || r.dataset.col1 == val) ? "" : "none";
+    });
+    filterBox.style.display = "none";
+}
+
+function searchTable() {
+    const q = search.value.toLowerCase();
+    rows.forEach(r => {
+        r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
+    });
+}
+
+function resetSearch() {
+    search.value = "";
+    rows.forEach(r => r.style.display = "");
+}
+</script>
+
+</body>
+</html>
