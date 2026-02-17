@@ -1,0 +1,43 @@
+SHOW GLOBAL STATUS WHERE Variable_name IN (
+    -- Базовые (из предыдущего запроса)
+    'Uptime',                    -- Время работы сервера
+    'Threads_connected',         -- Текущие подключения
+    'Threads_running',           -- Активные потоки
+    'Max_used_connections',      -- Максимум подключений
+    'Queries',                   -- Общее количество запросов
+    'Slow_queries',              -- Медленные запросы
+    'Innodb_buffer_pool_reads',  -- Чтения с диска (InnoDB)
+    'Innodb_buffer_pool_read_requests', -- Запросы чтения (InnoDB)
+    'Key_reads',                 -- Чтения ключей с диска
+    'Key_read_requests',         -- Запросы чтения ключей
+    'Com_select',                -- SELECT-запросы
+    'Com_insert',                -- INSERT
+    'Com_update',                -- UPDATE
+    'Com_delete',                -- DELETE
+    'Aborted_clients',           -- Прерванные клиентские соединения
+    'Aborted_connects',          -- Неудачные попытки подключения
+    
+    -- Ошибки и сбои
+    'Connection_errors_accept',  -- Ошибки принятия соединений
+    'Connection_errors_internal', -- Внутренние ошибки соединений
+    'Connection_errors_max_connections', -- Ошибки из-за лимита соединений
+    'Connection_errors_peer_address', -- Ошибки адреса пира
+    'Connection_errors_select',  -- Ошибки селекта соединений
+    'Connection_errors_tcpwrap', -- Ошибки TCP-wrap
+    
+    -- Дополнительные для анализа
+    'Bytes_received',            -- Байты получены (трафик)
+    'Bytes_sent',                -- Байты отправлены (трафик)
+    'Table_locks_immediate',     -- Немедленные блокировки таблиц
+    'Table_locks_waited',        -- Ожидаемые блокировки таблиц
+    'Qcache_hits',               -- Попадания в кэш запросов (если включен)
+    'Qcache_inserts',            -- Вставки в кэш запросов
+    'Qcache_not_cached',         -- Запросы не кэшированные
+    'Qcache_lowmem_prunes',      -- Очистки кэша из-за низкой памяти
+    'Handler_read_first',        -- Чтения первого ключа
+    'Handler_read_key',          -- Чтения по ключу
+    'Handler_read_next',         -- Чтения следующего
+    'Handler_read_prev',         -- Чтения предыдущего
+    'Handler_read_rnd',          -- Случайные чтения
+    'Handler_read_rnd_next'      -- Следующие случайные чтения
+);
