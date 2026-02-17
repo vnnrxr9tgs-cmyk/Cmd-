@@ -40,4 +40,48 @@ SHOW GLOBAL STATUS WHERE Variable_name IN (
     'Handler_read_prev',         -- Чтения предыдущего
     'Handler_read_rnd',          -- Случайные чтения
     'Handler_read_rnd_next'      -- Следующие случайные чтения
+
 );
+SELECT 
+    VARIABLE_NAME,
+    VARIABLE_VALUE
+FROM performance_schema.global_status
+WHERE VARIABLE_NAME IN (
+
+    -- Нагрузка
+    'Threads_running',
+    'Threads_connected',
+    'Max_used_connections',
+
+    -- Ошибки
+    'Aborted_connects',
+    'Aborted_clients',
+
+    -- Медленные запросы
+    'Slow_queries',
+
+    -- InnoDB память
+    'Innodb_buffer_pool_pages_total',
+    'Innodb_buffer_pool_pages_free',
+    'Innodb_buffer_pool_reads',
+    'Innodb_buffer_pool_read_requests',
+
+    -- Блокировки
+    'Innodb_row_lock_waits',
+    'Innodb_row_lock_time',
+
+    -- Временные таблицы
+    'Created_tmp_tables',
+    'Created_tmp_disk_tables',
+
+    -- Таблицы
+    'Open_tables',
+    'Opened_tables',
+
+    -- Flush / IO
+    'Innodb_data_reads',
+    'Innodb_data_writes',
+    'Innodb_log_waits'
+)
+AND VARIABLE_VALUE <> '0'
+ORDER BY VARIABLE_NAME;
