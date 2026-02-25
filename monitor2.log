@@ -1,0 +1,114 @@
+def get_db_results(self):
+    import cx_Oracle
+
+    try:
+        # Инициализация памяти уведомлений (если ещё нет)
+        if not hasattr(self, "_sent_records"):
+            self._sent_records = set()
+
+        # Подключение к Oracle
+        dsn = cx_Oracle.makedsn("localhost", 1521, service_name="ORCLPDB1")
+        connection = cx_Oracle.connect(user="username", password="password", dsn=dsn)
+        cursor = connection.cursor()
+
+        # ==========================================
+        # ЗАПРОС 1 — ID и VALUE
+        # ==========================================
+        cursor.execute("SELECT ID, VALUE FROM MY_TABLE ORDER BY ID")
+        rows1 = cursor.fetchall()
+
+        table1_str = " ".join(str(item) for row in rows1 for item in row)
+        table1_readable = "\n".join([f"ID: {row[0]}, VALUE: {row[1]}" for row in rows1])
+
+        # Ключ всей таблицы 1
+        table1_key = ("MY_TABLE", tuple(rows1))
+
+        if table1_key not in self._sent_records:
+            self._sent_records.add(table1_key)
+
+            self.root.after(0, lambda:
+                self.notifier.show(
+                    "📊 Вся таблица MY_TABLE",
+                    table1_readable,
+                    False,
+                    True
+                )
+            )
+
+        # ==========================================
+        # ЗАПРОС 3 — GAME_STATS
+        # ==========================================
+        cursor.execute("SELECT COUNT_PLAYERS, TASK_NAME, AGE FROM GAME_STATS")
+        cols3 = [col[0].lower() for col in cursor.description]
+        rows3 = cursor.fetchall()
+        table3 = [dict(zip(cols3, r)) for r in rows3]
+
+        # === УВЕДОМЛЕНИЕ: ВСЯ ТАБЛИЦА GAME_STATS (если изменилась) ===
+        table3_key = ("GAME_STATS_FULL", tuple(rows3))
+
+        if table3_key not in self._sent_records:
+            self._sent_records.add(table3_key)
+
+            all_table3_lines = []
+            for row in table3:
+                line = f"Игроков: {row['count_players']}, Задание: {row['task_name']}, Возраст: {row['age']}"
+                all_table3_lines.append(line)
+
+            all_table3_str = "\n".join(all_table3_lines)
+
+            self.root.after(0, lambda:
+                self.notifier.show(
+                    "📋 Вся таблица GAME_STATS",
+                    all_table3_str,
+                    False,
+                    True
+                )
+            )
+
+        # === УВЕДОМЛЕНИЯ: ТОЛЬКО НОВЫЕ СТРОКИ ===
+        for i, row in enumerate(table3):
+
+            record_key = (
+                row['count_players'],
+                row['task_name'],
+                row['age']
+            )
+
+            # Если уже уведомляли — пропускаем
+            if record_key in self._sent_records:
+                continue
+
+            # Запоминаем
+            self._sent_records.add(record_key)
+
+            formatted_string = (
+                f"Запись #{i+1}:\n"
+                f"👥 Игроков: {row['count_players']}\n"
+                f"🎯 Задание: {row['task_name']}\n"
+                f"🎂 Возраст: {row['age']}"
+            )
+
+            self.root.after(
+                0,
+                lambda idx=i, data=formatted_string:
+                self.notifier.show(
+                    f"📌 Запрос 3 — строка {idx+1}",
+                    data,
+                    False,
+                    True
+                )
+            )
+
+        connection.close()
+
+        return {
+            "table1": table1_str,
+            "table3": table3,
+            "summary": "\n".join(
+                [f"Игроков: {r['count_players']}, Задание: {r['task_name']}, Возраст: {r['age']}" for r in table3]
+            )
+        }
+
+    except Exception as e:
+        print("Oracle error:", e)
+        return {"table1": "", "table3": [], "summary": ""}
