@@ -1,110 +1,68 @@
-from flask import Flask, jsonify
-from datetime import datetime, timedelta
 import requests
+import json
 
-app = Flask(__name__)
+# Настройки подключения
+LM_STUDIO_URL = "http://localhost:1234/v1/chat/completions"
+# Важно: В LM Studio в разделе "Server" часто указывают ID модели.
+# Если не знаете, что там написано, попробуйте "local-model" или название вашей модели (например, "llama-3-8b")
+MODEL_NAME = "t-lite-it-2.1"
 
-ROCKET_URL = "http://rocketchat:000"
-USERNAME = "igor"
-PASSWORD = "123"
-CHANNEL_NAME = "test"
-
-auth_token = None
-user_id = None
-room_id = None
-
-MESSAGE_LIFETIME_MINUTES = 60
-last_message_ids = set()
+# Путь к вашему CSV файлу
+CSV_FILE_PATH = "shop1_yesterday.csv"
 
 
-def rocket_login():
-    global auth_token, user_id
-    url = f"{ROCKET_URL}/api/v1/login"
-    response = requests.post(url, json={
-        "user": USERNAME,
-        "password": PASSWORD
-    })
-    data = response.json()
-    if data.get("status") == "success":
-        auth_token = data["data"]["authToken"]
-        user_id = data["data"]["userId"]
-        return True
-    return False
+def send_csv_to_lm_studio(file_path):
+    # 1. Читаем CSV файл целиком как текст
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            csv_content = f.read()
+    except FileNotFoundError:
+        print(f"Файл {file_path} не найден.")
+        return
 
+    # 2. Формируем сообщения
+    # Системное сообщение: говорим модели, что она должна делать
+    system_message = "Ты — эксперт по анализу данных. Твоя задача — проанализировать предоставленный CSV-файл, найти закономерности и выдать краткую выжимку (сводку)."
 
-def rocket_get_room_id():
-    global room_id
-    url = f"{ROCKET_URL}/api/v1/channels.list"
-    headers = {
-        "X-Auth-Token": auth_token,
-        "X-User-Id": user_id
+    # Пользовательское сообщение: прикрепляем содержимое файла
+    user_message = f"Вот содержимое CSV файла:\n\n```csv\n{csv_content}\n```"
+
+    payload = {
+        "model": MODEL_NAME,
+        "messages": [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message}
+        ],
+        "temperature": 0.7,  # Настройки генерации
+        "stream": False
     }
-    response = requests.get(url, headers=headers)
-    data = response.json()
-    for channel in data.get("channels", []):
-        if channel["name"] == CHANNEL_NAME:
-            room_id = channel["_id"]
-            return True
-    return False
 
+    print("Отправка данных в LM Studio... Это может занять некоторое время.")
 
-def rocket_get_messages():
-    url = f"{ROCKET_URL}/api/v1/channels.messages?roomId={room_id}&count=20"
-    headers = {
-        "X-Auth-Token": auth_token,
-        "X-User-Id": user_id
-    }
-    response = requests.get(url, headers=headers)
-    data = response.json()
-    messages = []
-    for msg in data.get("messages", []):
-        if not msg.get("msg"):
-            continue
-        timestamp = datetime.fromisoformat(msg["ts"].replace("Z", "+00:00"))
-        messages.append({
-            "id": msg["_id"],
-            "user": msg["u"]["username"],
-            "text": msg["msg"],
-            "timestamp": timestamp.isoformat()
-        })
-    return messages
+    # 3. Отправляем POST запрос
+    try:
+        response = requests.post(LM_STUDIO_URL, json=payload, timeout=600)  # timeout 5 минут
 
+        # Проверка на ошибки
+        response.raise_for_status()
 
-def filter_recent(messages):
-    limit = datetime.utcnow() - timedelta(minutes=MESSAGE_LIFETIME_MINUTES)
-    return [m for m in messages if datetime.fromisoformat(m["timestamp"]) > limit]
+        # 4. Получаем и выводим ответ
+        result = response.json()
 
+        # Структура ответа от OpenAI-совместимого API
+        if 'choices' in result and len(result['choices']) > 0:
+            ai_response = result['choices'][0]['message']['content']
+            print("\n--- Ответ модели ---\n")
+            print(ai_response)
+        else:
+            print("Ошибка в структуре ответа:", result)
 
-def detect_new(messages):
-    global last_message_ids
-    current_ids = {m["id"] for m in messages}
-    new_ids = current_ids - last_message_ids
-    last_message_ids = current_ids
-    return list(new_ids)
-
-
-@app.route("/api/notifications")
-def notifications():
-    if not auth_token or not room_id:
-        return jsonify({"notifications": [], "new": []})
-
-    messages = rocket_get_messages()
-    messages = filter_recent(messages)
-    new_ids = detect_new(messages)
-    return jsonify({
-        "notifications": messages,
-        "new": new_ids
-    })
+    except requests.exceptions.ConnectionError:
+        print("Ошибка: Не удалось подключиться к LM Studio.")
+        print("Убедитесь, что сервер запущен (вкладка 'Server' в LM Studio) и выбрана модель.")
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
 
 
 if __name__ == "__main__":
-    # Инициализация Rocket.Chat
-    if not rocket_login():
-        print("Ошибка: не удалось залогиниться в Rocket.Chat")
-    elif not rocket_get_room_id():
-        print(f"Ошибка: канал '{CHANNEL_NAME}' не найден")
-    else:
-        print(f"Подключено к Rocket.Chat каналу '{CHANNEL_NAME}'")
-
-    # Запуск Flask
-    app.run(debug=True, port=5000)
+    send_csv_to_lm_studio(CSV_FILE_PATH)
