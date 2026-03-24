@@ -1,3 +1,4 @@
+https://wheelhouse.openquake.org/v3/windows/py311/
 1. Основной стек (High-level)
 Эти библиотеки реализуют ваш код:
 transformers (рекомендую версию 4.34.0)
