@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>{{ data.original_filename }}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f9fbfd;
+            color: #1e2f3e;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Кнопка возврата */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            padding: 8px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #3d6b8c;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .back-button:hover {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            transform: translateX(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            color: #1e5a7a;
+        }
+
+        .main-container {
+            max-width: 860px;
+            margin: 48px auto;
+            padding: 0 24px;
+        }
+
+        /* стиль для заголовка */
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            color: #1a3b4f;
+            margin-bottom: 12px;
+            line-height: 1.3;
+            border-left: 4px solid #7ab3c8;
+            padding-left: 20px;
+        }
+
+        /* мета-информация: дата, язык */
+        .meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            color: #6c86a3;
+            font-size: 14px;
+            font-weight: 450;
+            margin-bottom: 36px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e4edf2;
+        }
+
+        .lang {
+            background: #eef4fa;
+            color: #2c6e9e;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+
+        /* блок статьи */
+        .article-block {
+            background: #ffffff;
+            border: 1px solid #e6edf2;
+            border-radius: 20px;
+            padding: 24px 28px;
+            margin: 28px 0;
+            line-height: 1.65;
+            font-size: 16px;
+            text-align: left;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+            transition: box-shadow 0.2s ease;
+            position: relative;
+        }
+
+        .article-block:hover {
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.08);
+        }
+
+        /* заголовок блока */
+        .article-block strong:first-child {
+            display: block;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            color: #1c5777;
+            letter-spacing: -0.2px;
+            background: #f4f9fe;
+            padding: 4px 0 4px 12px;
+            border-left: 3px solid #7ab3c8;
+        }
+
+        /* кнопка копирования блока - в правом нижнем углу, всегда видна */
+        .copy-block-btn {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            background: #2c7da0;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .copy-block-btn:hover {
+            background: #1e5a7a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .copy-block-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-block-btn.copied {
+            background: #27ae60;
+        }
+
+        /* чтобы контент не наезжал на кнопку */
+        .article-block .block-content {
+            margin-bottom: 48px;
+        }
+
+        /* дополнительные элементы внутри контента */
+        .article-block ul, .article-block ol {
+            margin: 20px 0 20px 24px;
+            padding-left: 8px;
+        }
+
+        .article-block li {
+            margin: 8px 0;
+            line-height: 1.55;
+        }
+
+        .article-block blockquote {
+            background: #f4f8fc;
+            border-left: 4px solid #9bc0d4;
+            padding: 16px 24px;
+            margin: 24px 0;
+            border-radius: 16px;
+            font-style: normal;
+            color: #2c4b66;
+        }
+
+        .article-block code {
+            background: #eff3f6;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9em;
+            color: #1f6392;
+        }
+
+        .article-block pre {
+            background: #f3f6fa;
+            padding: 16px 20px;
+            border-radius: 16px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #e2ecf3;
+        }
+
+        .article-block a {
+            color: #2c7da0;
+            text-decoration: none;
+            border-bottom: 1px solid #cde1ec;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .article-block a:hover {
+            color: #155f82;
+            border-bottom-color: #2c7da0;
+        }
+
+        .article-block h2, .article-block h3 {
+            color: #1e4d6b;
+            font-weight: 600;
+            margin: 28px 0 12px 0;
+            letter-spacing: -0.2px;
+        }
+
+        .article-block h2 {
+            font-size: 22px;
+        }
+
+        .article-block h3 {
+            font-size: 19px;
+        }
+
+        /* Подсветка при поиске */
+        .highlight-scroll {
+            animation: highlightPulse 0.8s ease-in-out;
+            background-color: #e0f2fe !important;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        @keyframes highlightPulse {
+            0% {
+                background-color: #bae6fd;
+                box-shadow: 0 0 0 0 rgba(186, 230, 253, 0.7);
+            }
+            70% {
+                background-color: #e0f2fe;
+                box-shadow: 0 0 0 10px rgba(186, 230, 253, 0);
+            }
+            100% {
+                background-color: transparent;
+                box-shadow: 0 0 0 0 rgba(186, 230, 253, 0);
+            }
+        }
+
+        /* тост уведомление */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e2a3e;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: fadeInUp 0.3s ease;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* адаптация для мобильных */
+        @media (max-width: 680px) {
+            .main-container {
+                padding: 0 16px;
+                margin: 32px auto;
+            }
+            h1 {
+                font-size: 26px;
+                padding-left: 16px;
+            }
+            .article-block {
+                padding: 18px 20px 60px 20px;
+                margin: 20px 0;
+            }
+            .meta {
+                margin-bottom: 28px;
+            }
+            .copy-block-btn {
+                bottom: 12px;
+                right: 12px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            .back-button {
+                top: 12px;
+                left: 12px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Кнопка возврата -->
+<button onclick="goBack()" class="back-button">
+    ← Назад
+</button>
+
+<div class="main-container">
+    <h1>{{ data.original_filename.replace('.docx', '') }}</h1>
+
+    <div class="meta">
+        <span>📅 {{ data.processed_at[:16] }}</span>
+        <span class="lang">{{ data.language.upper() }}</span>
+    </div>
+
+    <div id="articleContent"></div>
+</div>
+
+<script>
+    // Информация об источнике
+    const sourceInfo = {
+        name: "DDFDigest",
+        url: window.location.origin,
+        description: "Интеллектуальный дайджест новостей"
+    };
+
+    const articleTitle = "{{ data.original_filename.replace('.docx', '') }}";
+    const articleDate = "{{ data.processed_at[:16] }}";
+
+    // Функция для возврата на главную
+    function goBack() {
+        window.location.href = '/';
+    }
+
+    // Функция для форматирования текста с сохранением структуры
+    function formatTextWithStructure(element) {
+        // Создаем временный div для работы с DOM
+        const tempDiv = document.createElement('div');
+        tempDiv.appendChild(element.cloneNode(true));
+
+        // Удаляем кнопку копирования
+        const copyBtn = tempDiv.querySelector('.copy-block-btn');
+        if (copyBtn) copyBtn.remove();
+
+        // Функция для рекурсивной обработки узлов и добавления переносов
+        function processNode(node, result) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                let text = node.textContent;
+                // Сохраняем значимые пробелы, но нормализуем множественные пробелы
+                text = text.replace(/[ \t]+/g, ' ');
+                if (text.trim()) {
+                    result.push(text);
+                }
+                return;
+            }
+
+            if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+            const tagName = node.tagName.toLowerCase();
+            const isBlockElement = [
+                'p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'li', 'blockquote', 'pre', 'section', 'article', 'strong'
+            ].includes(tagName);
+
+            // Перед блоковым элементом добавляем перенос строки (если это не первый элемент)
+            if (isBlockElement && result.length > 0 && !result[result.length - 1].endsWith('\n')) {
+                result.push('\n');
+            }
+
+            // Обрабатываем дочерние узлы
+            for (let child of node.childNodes) {
+                processNode(child, result);
+            }
+
+            // После блока добавляем перенос строки
+            if (isBlockElement) {
+                // Для списков и цитат добавляем дополнительный перенос
+                if (tagName === 'li') {
+                    result.push('\n');
+                } else if (tagName === 'blockquote' || tagName === 'pre') {
+                    result.push('\n\n');
+                } else {
+                    result.push('\n');
+                }
+            }
+
+            // Для переносов строк в HTML
+            if (tagName === 'br') {
+                result.push('\n');
+            }
+        }
+
+        const textParts = [];
+        for (let child of tempDiv.childNodes) {
+            processNode(child, textParts);
+        }
+
+        let formattedText = textParts.join('');
+
+        // Нормализуем множественные переносы строк
+        formattedText = formattedText
+            .replace(/\n{3,}/g, '\n\n')  // не более двух переносов подряд
+            .replace(/[ \t]+$/gm, '')      // удаляем пробелы в конце строк
+            .replace(/^\s+/, '')           // удаляем пробелы в начале
+            .trim();
+
+        return formattedText;
+    }
+
+    // Альтернативный метод копирования для HTTP (без HTTPS ограничений)
+    async function copyToClipboard(text) {
+        // Пробуем современный метод
+        if (navigator.clipboard && window.isSecureContext !== false) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (err) {
+                console.warn('Clipboard API failed:', err);
+            }
+        }
+
+        // Fallback для HTTP и старых браузеров (работает везде)
+        return new Promise((resolve, reject) => {
+            try {
+                // Создаем временный textarea
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.top = '-9999px';
+                textarea.style.left = '-9999px';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+
+                // Выделяем и копируем
+                textarea.select();
+                textarea.setSelectionRange(0, text.length);
+
+                const success = document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                if (success) {
+                    resolve(true);
+                } else {
+                    reject(new Error('execCommand copy failed'));
+                }
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    // Функция для копирования текста блока с указанием источника и форматированием
+    async function copyBlock(blockElement, btnElement, blockTitle) {
+        // Получаем отформатированный текст с сохранением структуры
+        let blockText = formatTextWithStructure(blockElement);
+
+        // Если форматирование не дало результата, используем innerText как запасной вариант
+        if (!blockText || blockText.length < 5) {
+            const blockClone = blockElement.cloneNode(true);
+            const copyBtnInClone = blockClone.querySelector('.copy-block-btn');
+            if (copyBtnInClone) copyBtnInClone.remove();
+            blockText = blockClone.innerText || blockClone.textContent;
+            blockText = blockText.trim();
+        }
+
+        // Формируем финальный текст с заголовком и источником
+        let finalText = '';
+        if (blockTitle && blockTitle !== 'Блок') {
+            finalText += `📌 ${blockTitle}\n\n`;
+        }
+        finalText += blockText;
+        finalText += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📖 Источник: ${sourceInfo.name}\n🔗 ${window.location.href}\n📅 ${new Date().toLocaleDateString('ru-RU')}`;
+
+        // Сохраняем оригинальное содержимое кнопки
+        const originalHTML = btnElement.innerHTML;
+
+        try {
+            await copyToClipboard(finalText);
+
+            // Визуальная обратная связь на кнопке
+            btnElement.innerHTML = '✓ Скопировано!';
+            btnElement.classList.add('copied');
+
+            // Показываем тост с информацией
+            showToast('✓ Блок скопирован с сохранением форматирования и указанием источника');
+
+            setTimeout(() => {
+                btnElement.innerHTML = originalHTML;
+                btnElement.classList.remove('copied');
+            }, 2000);
+        } catch (err) {
+            console.error('Ошибка при копировании:', err);
+            showToast('⚠️ Не удалось скопировать текст. Попробуйте выделить текст вручную.', 'error');
+
+            // Восстанавливаем кнопку
+            btnElement.innerHTML = originalHTML;
+            btnElement.classList.remove('copied');
+        }
+    }
+
+    // Функция для глобального копирования всего текста статьи
+    function copyFullArticle() {
+        const allBlocks = document.querySelectorAll('.article-block');
+        if (allBlocks.length === 0) {
+            showToast('Нет текста для копирования', 'error');
+            return;
+        }
+
+        let fullText = `📄 ${articleTitle}\n📅 ${articleDate}\n\n`;
+        fullText += `═══════════════════════════════════════\n\n`;
+
+        allBlocks.forEach((block, idx) => {
+            // Получаем заголовок блока
+            const titleStrong = block.querySelector('.block-content > strong');
+            let blockTitle = '';
+            if (titleStrong) {
+                blockTitle = titleStrong.textContent.trim();
+                fullText += `📌 ${blockTitle}\n\n`;
+            }
+
+            // Получаем форматированный текст блока
+            let blockText = formatTextWithStructure(block);
+            if (!blockText || blockText.length < 5) {
+                const blockClone = block.cloneNode(true);
+                const copyBtnInClone = blockClone.querySelector('.copy-block-btn');
+                if (copyBtnInClone) copyBtnInClone.remove();
+                blockText = blockClone.innerText || blockClone.textContent;
+                blockText = blockText.trim();
+            }
+
+            fullText += blockText;
+            fullText += `\n\n`;
+        });
+
+        fullText += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📖 Источник: ${sourceInfo.name}\n🔗 ${window.location.href}\n📅 ${new Date().toLocaleDateString('ru-RU')}`;
+
+        copyToClipboard(fullText).then(() => {
+            showToast('✓ Весь текст скопирован с сохранением форматирования');
+        }).catch(() => {
+            showToast('⚠️ Не удалось скопировать весь текст', 'error');
+        });
+    }
+
+    // Функция для показа уведомления
+    function showToast(message, type = 'success') {
+        // Удаляем старые тосты
+        const oldToasts = document.querySelectorAll('.toast');
+        oldToasts.forEach(toast => toast.remove());
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 2500);
+    }
+
+    // Функция для поиска и подсветки текста
+    function findAndHighlightText(searchText) {
+        if (!searchText) return null;
+
+        const blocks = document.querySelectorAll('.article-block');
+        let firstMatch = null;
+        const searchTerms = searchText.toLowerCase().split(/\s+/);
+
+        for (let block of blocks) {
+            const blockText = block.innerText.toLowerCase();
+            let found = false;
+
+            for (let term of searchTerms) {
+                if (blockText.includes(term)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found) {
+                firstMatch = block;
+                break;
+            }
+        }
+
+        return firstMatch;
+    }
+
+    // Функция для прокрутки к теме
+    function scrollToTopic(topicText) {
+        if (!topicText) return false;
+
+        const blocks = document.querySelectorAll('.article-block');
+
+        for (let block of blocks) {
+            if (block.innerText.includes(topicText)) {
+                removeHighlights();
+                block.classList.add('highlight-scroll');
+                block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => {
+                    block.classList.remove('highlight-scroll');
+                }, 2000);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function removeHighlights() {
+        const highlighted = document.querySelectorAll('.highlight-scroll');
+        highlighted.forEach(el => el.classList.remove('highlight-scroll'));
+    }
+
+    // Добавляем кнопку копирования всего текста
+    function addGlobalCopyButton() {
+        const metaDiv = document.querySelector('.meta');
+        if (metaDiv && !document.querySelector('.global-copy-btn')) {
+            const globalCopyBtn = document.createElement('button');
+            globalCopyBtn.className = 'global-copy-btn';
+            globalCopyBtn.innerHTML = '📋 Копировать всё';
+            globalCopyBtn.style.cssText = `
+                background: #eef4fa;
+                border: none;
+                border-radius: 40px;
+                padding: 4px 14px;
+                font-size: 13px;
+                font-weight: 500;
+                color: #2c6e9e;
+                cursor: pointer;
+                margin-left: auto;
+                transition: all 0.2s ease;
+                font-family: 'Inter', sans-serif;
+            `;
+            globalCopyBtn.onclick = copyFullArticle;
+            globalCopyBtn.onmouseenter = () => {
+                globalCopyBtn.style.background = '#e0eaf3';
+                globalCopyBtn.style.transform = 'translateY(-1px)';
+            };
+            globalCopyBtn.onmouseleave = () => {
+                globalCopyBtn.style.background = '#eef4fa';
+                globalCopyBtn.style.transform = 'translateY(0)';
+            };
+            metaDiv.appendChild(globalCopyBtn);
+        }
+    }
+
+    // Разбираем HTML на блоки и добавляем кнопки копирования
+    document.addEventListener('DOMContentLoaded', function() {
+        const contentContainer = document.getElementById('articleContent');
+        const htmlText = `{{ html_text | safe }}`;
+
+        // Временный div для парсинга HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlText;
+
+        // Получаем все элементы strong (заголовки)
+        const strongElements = tempDiv.querySelectorAll('strong');
+        let blocks = [];
+
+        if (strongElements.length > 0) {
+            // Если есть заголовки, группируем по ним
+            strongElements.forEach((strong, index) => {
+                let blockContent = '';
+                let currentElement = strong.nextSibling;
+                let nextStrong = strongElements[index + 1];
+
+                // Собираем содержимое до следующего strong
+                while (currentElement && currentElement !== nextStrong) {
+                    if (currentElement.nodeType === Node.ELEMENT_NODE) {
+                        blockContent += currentElement.outerHTML;
+                    } else if (currentElement.nodeType === Node.TEXT_NODE) {
+                        blockContent += currentElement.textContent;
+                    }
+                    currentElement = currentElement.nextSibling;
+                }
+
+                blocks.push({
+                    title: strong.textContent,
+                    content: blockContent
+                });
+            });
+        } else {
+            // Если нет заголовков, разбиваем по параграфам
+            const paragraphs = tempDiv.querySelectorAll('p');
+            if (paragraphs.length > 0) {
+                paragraphs.forEach(p => {
+                    blocks.push({
+                        title: '',
+                        content: p.outerHTML
+                    });
+                });
+            } else {
+                // Если ничего нет, просто весь HTML
+                blocks.push({
+                    title: '',
+                    content: htmlText
+                });
+            }
+        }
+
+        // Создаем блоки с кнопками копирования
+        blocks.forEach((block, index) => {
+            const blockDiv = document.createElement('div');
+            blockDiv.className = 'article-block';
+            blockDiv.setAttribute('data-block-idx', index);
+
+            // Контейнер для содержимого
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'block-content';
+
+            // Добавляем заголовок если есть
+            const blockTitle = block.title || `Блок ${index + 1}`;
+            if (block.title) {
+                const titleStrong = document.createElement('strong');
+                titleStrong.textContent = block.title;
+                contentDiv.appendChild(titleStrong);
+            }
+
+            // Добавляем содержимое
+            const innerContent = document.createElement('div');
+            innerContent.innerHTML = block.content;
+            contentDiv.appendChild(innerContent);
+            blockDiv.appendChild(contentDiv);
+
+            // Добавляем кнопку копирования
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-block-btn';
+            copyBtn.innerHTML = '📋 Копировать блок';
+            copyBtn.onclick = (function(b, btn, title) {
+                return function() { copyBlock(b, btn, title); };
+            })(blockDiv, copyBtn, blockTitle);
+
+            blockDiv.appendChild(copyBtn);
+            contentContainer.appendChild(blockDiv);
+        });
+
+        // Добавляем глобальную кнопку копирования
+        addGlobalCopyButton();
+
+        // Проверяем, нужно ли прокрутить к теме
+        const topicToScroll = localStorage.getItem('scrollToTopic');
+        if (topicToScroll) {
+            setTimeout(() => {
+                scrollToTopic(topicToScroll);
+                localStorage.removeItem('scrollToTopic');
+            }, 500);
+        }
+
+        // Проверяем, есть ли hash в URL (для поиска)
+        if (window.location.hash) {
+            const searchQuery = decodeURIComponent(window.location.hash.substring(1));
+            const element = findAndHighlightText(searchQuery);
+            if (element) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    element.classList.add('highlight-scroll');
+                    setTimeout(() => {
+                        element.classList.remove('highlight-scroll');
+                    }, 2000);
+                }, 300);
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
