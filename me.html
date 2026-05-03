@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Space Defenders - Защитники Космоса</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: black;
+            color: white;
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(10,10,30,0.98));
+            backdrop-filter: blur(8px);
+            z-index: 20;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px cyan;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px cyan; }
+            50% { text-shadow: 0 0 40px cyan; }
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.8;
+            max-width: 500px;
+            margin: 10px auto;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            background: linear-gradient(135deg, #2a6f8f, #1a4f6f);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0,255,255,0.3);
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #3a8faf, #2a6f8f);
+            box-shadow: 0 0 25px cyan;
+        }
+
+        .characters {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .characters div {
+            border: 2px solid cyan;
+            padding: 12px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: rgba(0,0,0,0.6);
+            min-width: 180px;
+        }
+
+        .characters div:hover {
+            background: rgba(0,255,255,0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,255,255,0.3);
+        }
+
+        .selected {
+            background: linear-gradient(135deg, rgba(0,255,255,0.4), rgba(0,100,100,0.4));
+            border-color: #00ffcc;
+            box-shadow: 0 0 20px cyan;
+            transform: scale(1.05);
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: none;
+            font-size: 20px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.8);
+            padding: 12px 25px;
+            border-radius: 50px;
+            z-index: 15;
+            backdrop-filter: blur(10px);
+            border: 1px solid cyan;
+            box-shadow: 0 0 20px rgba(0,255,255,0.3);
+            font-family: monospace;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        #ui span {
+            color: cyan;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .ui-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        canvas {
+            display: none;
+            cursor: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .game-over-stats {
+            background: rgba(0,0,0,0.8);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 20px;
+            border: 2px solid cyan;
+            min-width: 300px;
+        }
+
+        .game-over-stats p {
+            font-size: 24px;
+            margin: 15px 0;
+        }
+
+        .game-over-stats .score-value {
+            color: cyan;
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .notification {
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: red;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 100;
+            animation: slideInOut 2s ease-out forwards;
+            border: 2px solid red;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .sniper-notification {
+            position: fixed;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(255,215,0,0.9), rgba(255,100,0,0.9));
+            color: black;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 32px;
+            font-weight: bold;
+            z-index: 100;
+            animation: sniperFlash 1.5s ease-out forwards;
+            border: 3px solid gold;
+            white-space: nowrap;
+            text-shadow: 0 0 10px gold;
+            box-shadow: 0 0 30px rgba(255,215,0,0.5);
+            pointer-events: none;
+        }
+
+        @keyframes slideInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+        }
+
+        @keyframes sniperFlash {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); background: radial-gradient(circle, gold, orange); }
+            30% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        }
+
+        .floating-text {
+            position: fixed;
+            z-index: 80;
+            font-weight: bold;
+            font-size: 28px;
+            animation: floatUp 1.5s ease-out forwards;
+            pointer-events: none;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -80px); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="startScreen" class="screen">
+    <h1>🚀 Защитники Космоса</h1>
+    <p>
+        Ты — рыцарь звёзд. Орды врагов атакуют галактику.<br>
+        Твоя задача — выжить как можно дольше и защитить пространство.
+    </p>
+
+    <h3>✨ Выбери персонажа ✨</h3>
+    <div class="characters">
+        <div id="char-igor" onclick="selectChar('igor')">
+            <strong>⚔️ Игорь</strong><br>
+            <small>Спокойный ветеран</small>
+        </div>
+        <div id="char-valera" onclick="selectChar('valera')">
+            <strong>🔥 Валера</strong><br>
+            <small>Безумный пилот (быстрая стрельба)</small>
+        </div>
+        <div id="char-kostya" onclick="selectChar('kostya')">
+            <strong>💨 Костя</strong><br>
+            <small>Мастер уклонения (высокая скорость)</small>
+        </div>
+    </div>
+
+    <h3>📖 Обучение</h3>
+    <p>
+        ← → двигаться<br>
+        Пробел — стрелять<br>
+        Q или Й — бомба (уничтожает всех врагов)<br>
+        💡 Подбирай бонусы: ❤️ жизнь, 💣 бомба<br>
+        🎯 Снайперская серия: 5 врагов за 8 секунд → +30 очков!<br>
+        ⚠️ 5 промахов подряд → -10 очков!<br>
+        👑 Редкий золотой враг (3 выстрела) — 50 очков!
+    </p>
+
+    <button onclick="startGame()">▶ Играть ▶</button>
+</div>
+
+<!-- GAME UI -->
+<div id="ui">
+    <div class="ui-item">❤️ <span id="lives">3</span></div>
+    <div class="ui-item">🎯 <span id="score">0</span></div>
+    <div class="ui-item">💣 <span id="bombs">2</span></div>
+    <div class="ui-item">🔫 <span id="shotsFired">0</span></div>
+    <div class="ui-item">🎯 <span id="sniperCounter">0/5</span></div>
+    <div class="ui-item">👤 <span id="character">Игорь</span></div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- GAME OVER -->
+<div id="gameOverScreen" class="screen" style="display:none;">
+    <div class="game-over-stats">
+        <h1>💀 GAME OVER 💀</h1>
+        <p>🏆 ТВОЙ РЕЗУЛЬТАТ 🏆</p>
+        <p class="score-value" id="finalScore">0</p>
+        <p>🎯 очков</p>
+        <p id="waveInfo"></p>
+        <button onclick="restartGame()">🔄 Играть снова 🔄</button>
+        <button onclick="backToMenu()" style="background: linear-gradient(135deg, #6f2a2a, #4f1a1a); margin-top: 10px;">🏠 Главное меню</button>
+    </div>
+</div>
+
+<script>
+    // ---------- CANVAS ----------
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        if (player) {
+            player.x = Math.min(Math.max(player.x, 30), canvas.width - 30);
+            player.y = canvas.height - 100;
+        }
+    }
+
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        if (gameRunning && player) {
+            player.x = Math.min(Math.max(player.x, 30), canvas.width - 30);
+        }
+        initStars();
+    });
+
+    // ---------- GAME STATE ----------
+    let gameRunning = false;
+    let gameOver = false;
+    let animationId = null;
+
+    let keys = {};
+    let bullets = [];
+    let enemies = [];
+    let stars = [];
+    let particles = [];
+    let bonuses = [];
+    let floatingTexts = [];
+
+    let lives = 3;
+    let score = 0;
+    let bombs = 2;
+    let wave = 1;
+    let enemiesKilledThisWave = 0;
+    let totalShots = 0;
+    let totalHits = 0;
+    let totalKills = 0;
+    let rareEnemyOnScreen = false;
+
+    let lastShot = 0;
+    let shootDelay = 250;
+
+    let lastTimestamp = 0;
+
+    // Система снайпера (5 убийств за 8 секунд)
+    let sniperKills = 0;
+    let sniperTimerStart = null;
+    const SNIPER_TIME_LIMIT = 8000;
+    let sniperActive = false;
+
+    // Система промахов
+    let consecutiveMisses = 0;
+
+    // Визуальные эффекты
+    let damageFlashTimer = 0;
+
+    let selectedCharacter = 'igor';
+
+    // ---------- СЛОЖНОСТЬ ----------
+    let difficulty = {
+        currentSpeed: 1.2,
+        maxSpeed: 4.5,
+        spawnDelay: 1800,
+        minSpawnDelay: 450,
+        enemiesPerWave: 5,
+        speedIncrease: 0.08,
+        spawnDecrease: 45
+    };
+
+    let lastSpawnTime = 0;
+    let lastBonusTime = 0;
+    let bonusSpawnDelay = 8000;
+
+    // ---------- PLAYER ----------
+    const player = {
+        x: canvas.width / 2,
+        y: canvas.height - 100,
+        width: 30,
+        height: 40,
+        speed: 6
+    };
+
+    // ---------- ПАРАМЕТРЫ ПЕРСОНАЖЕЙ ----------
+    const characters = {
+        igor: {
+            name: 'Игорь',
+            speed: 6,
+            shootDelay: 250,
+            color: 'cyan',
+            bulletColor: 'yellow'
+        },
+        valera: {
+            name: 'Валера',
+            speed: 6,
+            shootDelay: 140,
+            color: '#ff6600',
+            bulletColor: '#ff3300'
+        },
+        kostya: {
+            name: 'Костя',
+            speed: 9,
+            shootDelay: 250,
+            color: '#00ff66',
+            bulletColor: '#00ff99'
+        }
+    };
+
+    // ---------- УВЕДОМЛЕНИЯ ----------
+    function showNotification(message, isError = false) {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        notification.style.color = isError ? '#ff4444' : '#00ff00';
+        notification.style.border = isError ? '2px solid #ff4444' : '2px solid #00ff00';
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 2000);
+    }
+
+    function showSniperNotification() {
+        const notification = document.createElement('div');
+        notification.className = 'sniper-notification';
+        notification.textContent = '🎯 СНАЙПЕР KILL! +30 🎯';
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 1500);
+    }
+
+    function showFloatingText(x, y, text, color = '#FFD700') {
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.textContent = text;
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.style.color = color;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1500);
+    }
+
+    // ---------- СНАЙПЕРСКАЯ СЕРИЯ ----------
+    function addSniperKill() {
+        const now = Date.now();
+        if (!sniperActive || (now - sniperTimerStart > SNIPER_TIME_LIMIT)) {
+            sniperKills = 1;
+            sniperTimerStart = now;
+            sniperActive = true;
+        } else {
+            sniperKills++;
+        }
+        document.getElementById("sniperCounter").innerText = `${sniperKills}/5`;
+
+        if (sniperKills >= 5) {
+            score += 30;
+            updateUI();
+            showSniperNotification();
+            showNotification('🔥 Снайперская серия! +30 очков! 🔥');
+            sniperKills = 0;
+            sniperActive = false;
+            document.getElementById("sniperCounter").innerText = "0/5";
+        }
+
+        if (sniperActive && (now - sniperTimerStart > SNIPER_TIME_LIMIT)) {
+            sniperKills = 0;
+            sniperActive = false;
+            document.getElementById("sniperCounter").innerText = "0/5";
+        }
+    }
+
+    function handleMiss() {
+        consecutiveMisses++;
+        if (consecutiveMisses === 5) {
+            score = Math.max(0, score - 10);
+            updateUI();
+            showNotification('⚠️ Штраф за промахи! -10 очков! ⚠️', true);
+            consecutiveMisses = 0;
+        }
+    }
+
+    function resetMissStreak() {
+        consecutiveMisses = 0;
+    }
+
+    // ---------- БОМБА ----------
+    function useBomb() {
+        if (bombs <= 0) {
+            showNotification('💣 Нет бомб! 💣', true);
+            return false;
+        }
+        if (enemies.length === 0) {
+            showNotification('😐 Нет врагов на экране', true);
+            return false;
+        }
+
+        bombs--;
+        updateUI();
+
+        const enemiesToDestroy = [...enemies];
+        enemies = [];
+
+        enemiesToDestroy.forEach(enemy => {
+            createExplosion(enemy.x, enemy.y, 20);
+            score += 10;
+            if (enemy.isRare) rareEnemyOnScreen = false;
+            totalKills++;
+        });
+
+        updateUI();
+        showNotification(`💥 ${enemiesToDestroy.length} врагов уничтожено! 💥`);
+
+        enemiesKilledThisWave += enemiesToDestroy.length;
+        if (enemiesKilledThisWave >= difficulty.enemiesPerWave) {
+            increaseDifficulty();
+        }
+        resetMissStreak();
+        return true;
+    }
+
+    // ---------- ВЫБОР ПЕРСОНАЖА ----------
+    window.selectChar = function(characterId) {
+        document.querySelectorAll(".characters div").forEach(el => el.classList.remove("selected"));
+        const selectedElement = document.getElementById(`char-${characterId}`);
+        if (selectedElement) selectedElement.classList.add("selected");
+        selectedCharacter = characterId;
+    };
+
+    // ---------- УПРАВЛЕНИЕ ИГРОЙ ----------
+    window.startGame = function() {
+        document.getElementById("startScreen").style.display = "none";
+        document.getElementById("ui").style.display = "flex";
+        canvas.style.display = "block";
+
+        resetGame();
+        initStars();
+
+        gameRunning = true;
+        gameOver = false;
+        lastTimestamp = 0;
+        lastSpawnTime = Date.now();
+        lastBonusTime = Date.now();
+
+        document.getElementById("character").innerText = characters[selectedCharacter].name;
+
+        if (animationId) cancelAnimationFrame(animationId);
+        animationId = requestAnimationFrame(gameLoop);
+    };
+
+    window.restartGame = function() {
+        document.getElementById("gameOverScreen").style.display = "none";
+        resetGame();
+        initStars();
+
+        gameRunning = true;
+        gameOver = false;
+        lastTimestamp = 0;
+        lastSpawnTime = Date.now();
+        lastBonusTime = Date.now();
+
+        if (animationId) cancelAnimationFrame(animationId);
+        animationId = requestAnimationFrame(gameLoop);
+    };
+
+    window.backToMenu = function() {
+        document.getElementById("gameOverScreen").style.display = "none";
+        document.getElementById("startScreen").style.display = "flex";
+        document.getElementById("ui").style.display = "none";
+        canvas.style.display = "none";
+
+        gameRunning = false;
+        gameOver = false;
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+    };
+
+    // ---------- INPUT ----------
+    window.addEventListener("keydown", (e) => {
+        keys[e.code] = true;
+        if (e.code === "Space") e.preventDefault();
+        if (e.code === "KeyQ" || e.code === "KeyY") {
+            e.preventDefault();
+            if (gameRunning && !gameOver) useBomb();
+        }
+    });
+
+    window.addEventListener("keyup", (e) => {
+        keys[e.code] = false;
+    });
+
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // ---------- СБРОС ИГРЫ ----------
+    function resetGame() {
+        lives = 3;
+        score = 0;
+        bombs = 2;
+        wave = 1;
+        enemiesKilledThisWave = 0;
+        consecutiveMisses = 0;
+        sniperKills = 0;
+        sniperActive = false;
+        sniperTimerStart = null;
+        totalShots = 0;
+        totalHits = 0;
+        totalKills = 0;
+        rareEnemyOnScreen = false;
+        damageFlashTimer = 0;
+
+        bullets = [];
+        enemies = [];
+        particles = [];
+        bonuses = [];
+        floatingTexts = [];
+
+        difficulty.currentSpeed = 1.2;
+        difficulty.spawnDelay = 1800;
+
+        const charStats = characters[selectedCharacter];
+        player.speed = charStats.speed;
+        shootDelay = charStats.shootDelay;
+
+        player.x = canvas.width / 2;
+        player.y = canvas.height - 100;
+
+        updateUI();
+        document.getElementById("sniperCounter").innerText = "0/5";
+        document.getElementById("shotsFired").innerText = "0";
+    }
+
+    // ---------- ЗВЁЗДЫ ----------
+    function initStars() {
+        stars = [];
+        const starCount = Math.min(150, Math.floor(canvas.width * canvas.height / 5000));
+        for (let i = 0; i < starCount; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                speed: Math.random() * 0.8 + 0.2,
+                size: Math.random() * 2 + 1,
+                alpha: Math.random() * 0.5 + 0.3
+            });
+        }
+    }
+
+    // ---------- ИГРОВОЙ ЦИКЛ ----------
+    function gameLoop(timestamp) {
+        if (!gameRunning || gameOver) return;
+
+        if (!lastTimestamp) {
+            lastTimestamp = timestamp;
+            requestAnimationFrame(gameLoop);
+            return;
+        }
+
+        let delta = Math.min(32, timestamp - lastTimestamp);
+        if (delta > 0) {
+            update(delta);
+            draw();
+        }
+
+        lastTimestamp = timestamp;
+        animationId = requestAnimationFrame(gameLoop);
+    }
+
+    // ---------- БОНУСЫ ----------
+    function spawnBonus() {
+        const now = Date.now();
+        if (now - lastBonusTime > bonusSpawnDelay) {
+            const bonusType = Math.random() < 0.5 ? 'life' : 'bomb';
+            bonuses.push({
+                x: Math.random() * (canvas.width - 60) + 30,
+                y: -30,
+                type: bonusType,
+                width: 30,
+                height: 30,
+                spawnTime: now,
+                lifeTime: 15000
+            });
+            lastBonusTime = now;
+        }
+    }
+
+    function updateSniperTimer() {
+        if (sniperActive && sniperTimerStart) {
+            if (Date.now() - sniperTimerStart > SNIPER_TIME_LIMIT) {
+                sniperKills = 0;
+                sniperActive = false;
+                document.getElementById("sniperCounter").innerText = "0/5";
+            }
+        }
+    }
+
+    // ---------- ОБНОВЛЕНИЕ ----------
+    function update(delta) {
+        updateSniperTimer();
+
+        // Урон экрана
+        if (damageFlashTimer > 0) damageFlashTimer -= delta;
+
+        // Движение игрока
+        if (keys["ArrowLeft"]) player.x -= player.speed * (delta / 16);
+        if (keys["ArrowRight"]) player.x += player.speed * (delta / 16);
+        player.x = Math.max(25, Math.min(canvas.width - 25, player.x));
+
+        // Стрельба
+        if (keys["Space"]) shoot();
+
+        // Пули
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            bullets[i].y -= bullets[i].speed * (delta / 16);
+            if (bullets[i].y < 0 || bullets[i].y > canvas.height) {
+                if (bullets[i].active && gameRunning) {
+                    handleMiss();
+                    bullets[i].active = false;
+                }
+                bullets.splice(i, 1);
+            }
+        }
+
+        // Спавн врагов
+        const now = Date.now();
+        if (now - lastSpawnTime > difficulty.spawnDelay && gameRunning) {
+            spawnEnemy();
+            lastSpawnTime = now;
+        }
+
+        // Бонусы
+        spawnBonus();
+
+        for (let i = bonuses.length - 1; i >= 0; i--) {
+            const bonus = bonuses[i];
+            bonus.y += 2.5 * (delta / 16);
+
+            if (now - bonus.spawnTime > bonus.lifeTime) {
+                bonuses.splice(i, 1);
+                continue;
+            }
+
+            if (Math.abs(bonus.x - player.x) < 22 &&
+                Math.abs(bonus.y - (player.y + 20)) < 35) {
+                if (bonus.type === 'life') {
+                    lives = Math.min(lives + 1, 5);
+                    showNotification('❤️ +1 Жизнь! ❤️');
+                } else if (bonus.type === 'bomb') {
+                    bombs++;
+                    showNotification('💣 +1 Бомба! 💣');
+                }
+                bonuses.splice(i, 1);
+                updateUI();
+            }
+        }
+
+        // Враги
+        for (let ei = enemies.length - 1; ei >= 0; ei--) {
+            const e = enemies[ei];
+            e.y += e.speed * (delta / 16);
+
+            // Столкновение с игроком
+            const dx = Math.abs(e.x - player.x);
+            const dy = Math.abs(e.y - (player.y + 20));
+            if (dx < (e.size / 2 + 18) && dy < (e.size / 2 + 22)) {
+                enemies.splice(ei, 1);
+                if (e.isRare) rareEnemyOnScreen = false;
+                lives--;
+                damageFlashTimer = 200;
+                updateUI();
+                createExplosion(e.x, e.y, 15);
+                resetMissStreak();
+                sniperKills = 0; sniperActive = false;
+                document.getElementById("sniperCounter").innerText = "0/5";
+                if (lives <= 0) { endGame(); return; }
+                continue;
+            }
+
+            // Улетел за экран
+            if (e.y - e.size > canvas.height) {
+                enemies.splice(ei, 1);
+                if (e.isRare) rareEnemyOnScreen = false;
+                lives--;
+                damageFlashTimer = 200;
+                updateUI();
+                resetMissStreak();
+                sniperKills = 0; sniperActive = false;
+                document.getElementById("sniperCounter").innerText = "0/5";
+                if (lives <= 0) { endGame(); return; }
+                continue;
+            }
+
+            // Попадания пуль
+            let hit = false;
+            for (let bi = bullets.length - 1; bi >= 0; bi--) {
+                const b = bullets[bi];
+                if (Math.abs(b.x - e.x) < e.size / 2 + 4 &&
+                    Math.abs(b.y - e.y) < e.size / 2 + 6) {
+                    bullets.splice(bi, 1);
+                    hit = true;
+                    break;
+                }
+            }
+
+            if (hit) {
+                totalHits++;
+                resetMissStreak();
+                e.hp--;
+
+                if (e.hp <= 0) {
+                    // Убит
+                    createExplosion(e.x, e.y, e.isRare ? 40 : 12);
+                    enemies.splice(ei, 1);
+                    totalKills++;
+
+                    if (e.isRare) {
+                        score += 50;
+                        rareEnemyOnScreen = false;
+                        showFloatingText(e.x, e.y, '+50', '#FFD700');
+                        createExplosion(e.x, e.y, 50); // большая вспышка
+                    } else {
+                        score += 10;
+                        addSniperKill();
+                    }
+
+                    enemiesKilledThisWave++;
+                    if (enemiesKilledThisWave >= difficulty.enemiesPerWave) {
+                        increaseDifficulty();
+                    }
+                }
+                // Если hp > 0, враг остаётся, пуля уже удалена
+                updateUI();
+            }
+        }
+
+        // Частицы
+        for (let i = particles.length - 1; i >= 0; i--) {
+            particles[i].x += particles[i].vx;
+            particles[i].y += particles[i].vy;
+            particles[i].life--;
+            if (particles[i].life <= 0) particles.splice(i, 1);
+        }
+
+        // Звёзды
+        stars.forEach(s => {
+            s.y += s.speed;
+            if (s.y > canvas.height) {
+                s.y = 0;
+                s.x = Math.random() * canvas.width;
+            }
+        });
+    }
+
+    function spawnEnemy() {
+        const size = 25 + Math.random() * 15;
+        const speedVariation = (Math.random() - 0.5) * 0.8;
+        let enemySpeed = difficulty.currentSpeed + speedVariation;
+        enemySpeed = Math.max(0.8, Math.min(difficulty.maxSpeed, enemySpeed));
+
+        const isRare = !rareEnemyOnScreen && Math.random() < 0.1;
+        const hp = isRare ? 3 : 1;
+        const rareSize = 45 + Math.random() * 10;
+
+        if (isRare) rareEnemyOnScreen = true;
+
+        enemies.push({
+            x: Math.random() * (canvas.width - 80) + 40,
+            y: - (isRare ? rareSize : size),
+            size: isRare ? rareSize : size,
+            speed: enemySpeed * (isRare ? 0.7 : 1),
+            hp: hp,
+            isRare: isRare
+        });
+    }
+
+    function increaseDifficulty() {
+        wave++;
+        enemiesKilledThisWave = 0;
+        difficulty.currentSpeed = Math.min(difficulty.maxSpeed, difficulty.currentSpeed + difficulty.speedIncrease);
+        difficulty.spawnDelay = Math.max(difficulty.minSpawnDelay, difficulty.spawnDelay - difficulty.spawnDecrease);
+        showWaveNotification();
+    }
+
+    function showWaveNotification() {
+        const notification = document.createElement('div');
+        notification.textContent = `🌊 ВОЛНА ${wave} 🌊`;
+        Object.assign(notification.style, {
+            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+            color: 'cyan', fontSize: '40px', fontWeight: 'bold', textShadow: '0 0 20px cyan',
+            zIndex: '100', backgroundColor: 'rgba(0,0,0,0.8)', padding: '20px 40px',
+            borderRadius: '20px', border: '2px solid cyan', animation: 'slideInOut 2s ease-out forwards',
+            pointerEvents: 'none'
+        });
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 2000);
+    }
+
+    function createExplosion(x, y, count) {
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 7,
+                vy: (Math.random() - 0.5) * 7,
+                life: 20 + Math.random() * 15,
+                size: Math.random() * 5 + 2,
+                color: `hsl(${Math.random() * 60 + 30}, 100%, 50%)`
+            });
+        }
+    }
+
+    function updateUI() {
+        document.getElementById("lives").innerText = Math.max(0, lives);
+        document.getElementById("score").innerText = score;
+        document.getElementById("bombs").innerText = bombs;
+        document.getElementById("shotsFired").innerText = totalShots;
+    }
+
+    // ---------- ОТРИСОВКА ----------
+    function draw() {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Звёзды
+        stars.forEach(s => {
+            ctx.fillStyle = `rgba(255,255,255,${s.alpha + Math.random() * 0.3})`;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Красная вспышка при уроне
+        if (damageFlashTimer > 0) {
+            ctx.fillStyle = `rgba(255, 0, 0, ${Math.min(0.4, damageFlashTimer / 200 * 0.4)})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Зловещая виньетка при низком здоровье
+        if (lives <= 1 && lives > 0) {
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, canvas.width * 0.4,
+                canvas.width / 2, canvas.height / 2, canvas.width * 0.9
+            );
+            gradient.addColorStop(0, 'rgba(0,0,0,0)');
+            gradient.addColorStop(1, 'rgba(80,0,0,0.5)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        const charStats = characters[selectedCharacter];
+
+        // Игрок
+        ctx.save();
+        ctx.shadowColor = charStats.color;
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = charStats.color;
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x - 20, player.y + 42);
+        ctx.lineTo(player.x + 20, player.y + 42);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = `rgba(0, 255, 255, 0.6)`;
+        ctx.beginPath();
+        ctx.moveTo(player.x - 20, player.y + 20);
+        ctx.lineTo(player.x - 35, player.y + 42);
+        ctx.lineTo(player.x - 20, player.y + 42);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(player.x + 20, player.y + 20);
+        ctx.lineTo(player.x + 35, player.y + 42);
+        ctx.lineTo(player.x + 20, player.y + 42);
+        ctx.fill();
+        ctx.restore();
+
+        // Пули
+        bullets.forEach(b => {
+            ctx.save();
+            ctx.shadowColor = charStats.bulletColor;
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = charStats.bulletColor;
+            ctx.fillRect(b.x - 3, b.y, 6, 12);
+            ctx.restore();
+        });
+
+        // Враги
+        enemies.forEach(e => {
+            ctx.save();
+            if (e.isRare) {
+                // Золотой редкий враг
+                const gradient = ctx.createRadialGradient(e.x, e.y, e.size/3, e.x, e.y, e.size);
+                gradient.addColorStop(0, '#FFD700');
+                gradient.addColorStop(0.7, '#B8860B');
+                gradient.addColorStop(1, '#3b2000');
+                ctx.fillStyle = gradient;
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 20;
+            } else {
+                const gradient = ctx.createRadialGradient(e.x, e.y, 3, e.x, e.y, e.size/1.5);
+                gradient.addColorStop(0, "#ff4444");
+                gradient.addColorStop(1, "#440000");
+                ctx.fillStyle = gradient;
+                ctx.shadowColor = "red";
+                ctx.shadowBlur = 15;
+            }
+            ctx.beginPath();
+            ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2);
+            ctx.fill();
+
+            // Глаза
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(e.x - e.size/4, e.y - e.size/7, e.size/7, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(e.x + e.size/4, e.y - e.size/7, e.size/7, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "black";
+            ctx.beginPath();
+            ctx.arc(e.x - e.size/4, e.y - e.size/7, e.size/14, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(e.x + e.size/4, e.y - e.size/7, e.size/14, 0, Math.PI*2);
+            ctx.fill();
+
+            // Индикатор HP редкого врага
+            if (e.isRare && e.hp > 0) {
+                ctx.font = "bold 14px monospace";
+                ctx.fillStyle = "white";
+                ctx.shadowBlur = 5;
+                ctx.fillText('❤️'.repeat(e.hp), e.x - 15, e.y - e.size/2 - 8);
+            }
+
+            ctx.restore();
+        });
+
+        // Бонусы
+        bonuses.forEach(b => {
+            const timeLeft = Math.max(0, (b.spawnTime + b.lifeTime - Date.now()) / 1000);
+            ctx.save();
+            ctx.shadowBlur = 10;
+            ctx.font = `${b.width}px Arial`;
+            ctx.textAlign = "center";
+            if (b.type === 'life') {
+                ctx.fillStyle = '#ff4444';
+                ctx.fillText('❤️', b.x, b.y + 12);
+            } else {
+                ctx.fillStyle = '#cc66ff';
+                ctx.fillText('💣', b.x, b.y + 12);
+            }
+            ctx.font = "bold 14px monospace";
+            ctx.fillStyle = `rgba(255, 255, 255, 0.9)`;
+            ctx.shadowBlur = 3;
+            ctx.fillText(`${Math.ceil(timeLeft)}с`, b.x, b.y - 10);
+            ctx.restore();
+        });
+
+        // Частицы
+        particles.forEach(p => {
+            ctx.fillStyle = p.color || `rgba(255, 100, 0, ${p.life / 25})`;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+
+        // Волна
+        ctx.font = "bold 20px monospace";
+        ctx.fillStyle = "cyan";
+        ctx.shadowBlur = 5;
+        ctx.fillText(`Волна ${wave}`, canvas.width - 100, 50);
+    }
+
+    // ---------- СТРЕЛЬБА ----------
+    function shoot() {
+        const now = Date.now();
+        if (now - lastShot > shootDelay) {
+            bullets.push({
+                x: player.x,
+                y: player.y - 25,
+                speed: 12,
+                active: true
+            });
+            totalShots++;
+            updateUI();
+            lastShot = now;
+        }
+    }
+
+    // ---------- КОНЕЦ ИГРЫ ----------
+    function endGame() {
+        gameOver = true;
+        gameRunning = false;
+
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+
+        document.getElementById("finalScore").innerText = score;
+        const accuracy = totalShots > 0 ? (totalHits / totalShots * 100).toFixed(1) : 0;
+        document.getElementById("waveInfo").innerHTML =
+            `🌊 Вы продержались до ${wave} волны 🌊<br>` +
+            `👾 Уничтожено врагов: ${totalKills} 👾<br>` +
+            `🔫 Выстрелов: ${totalShots} | Попаданий: ${totalHits}<br>` +
+            `🎯 Точность: ${accuracy}%`;
+
+        document.getElementById("gameOverScreen").style.display = "flex";
+    }
+
+    // Инициализация выделения персонажа
+    setTimeout(() => {
+        document.getElementById('char-igor').classList.add('selected');
+    }, 100);
+
+    resizeCanvas();
+    initStars();
+</script>
+</body>
+</html>

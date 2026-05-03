@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant - LM Studio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="/static/cdn/styles/github-dark.min.css">
+    <script src="/static/cdn/highlight.min.js"></script>
+    <script src="/static/cdn/languages/python.min.js"></script>
+    <script src="/static/cdn/languages/javascript.min.js"></script>
+    <script src="/static/cdn/languages/bash.min.js"></script>
+    <script src="/static/cdn/languages/json.min.js"></script>
+    <script src="/static/cdn/languages/xml.min.js"></script>
+    <script src="/static/cdn/languages/css.min.js"></script>
+    <script src="/static/cdn/languages/sql.min.js"></script>
+    <link rel="stylesheet" href="/static/cdn/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <button class="menu-toggle-btn" id="menuToggleBtn">
+            <i class="fas fa-sliders-h"></i>
+        </button>
+
+        <div class="drawer-menu" id="drawerMenu">
+            <div class="drawer-header">
+                <h2><i class="fas fa-robot"></i> Настройки чата</h2>
+                <button class="drawer-close" id="drawerClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="drawer-content">
+                <div class="settings-section">
+                    <div class="section-header">
+                        <i class="fas fa-star"></i>
+                        <h3>Основные</h3>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="model-select">
+                            <i class="fas fa-microchip"></i> Модель
+                        </label>
+                        <select id="model-select">
+                            <option value="">-- Выберите модель --</option>
+                        </select>
+                        <small>Выберите модель из списка</small>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>
+                            <i class="fas fa-image"></i> Изображение для обработки
+                        </label>
+                        <div class="image-upload-area" id="imageUploadArea">
+                            <input type="file" id="imageInput" accept="image/jpeg,image/png,image/jpg,image/webp" style="display: none;">
+                            <button type="button" class="upload-image-btn" id="uploadImageBtn">
+                                <i class="fas fa-cloud-upload-alt"></i> Выбрать изображение
+                            </button>
+                            <div id="imagePreviewContainer" style="display: none;">
+                                <div class="image-preview">
+                                    <img id="imagePreview" src="" alt="Preview">
+                                    <button type="button" class="remove-image-btn" id="removeImageBtn">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <small id="imageInfo"></small>
+                            </div>
+                        </div>
+                        <small>Поддерживаются форматы: JPEG, PNG, WebP.</small>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="system-prompt">
+                            <i class="fas fa-comment-dots"></i> Системный промпт
+                        </label>
+                        <textarea id="system-prompt" rows="5" placeholder="Ты полезный ассистент или профессиональный переводчик"></textarea>
+                        <small>Определяет «личность» модели и ограничения. Опишите здесь желаемый стиль общения, формат ответов или специфику задачи для достижения наилучшего результата.</small>
+
+                    </div>
+
+                    <div class="setting-group">
+                        <label>🌡️ Temperature: <span id="temp-value">0.7</span></label>
+                        <input type="range" id="temperature" min="0" max="2" step="0.01" value="0.7">
+                        <small>При работе с изображением Используйте 0.1–0.4, чтобы аккуратно «считать» текст с изображения.Используйте 0.8 и выше для живого общения и полета фантазии.</small>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>🎯 Top P: <span id="topp-value">0.9</span></label>
+                        <input type="range" id="top-p" min="0" max="1" step="0.01" value="0.9">
+                        <small>Модель выбирает из топ-процента наиболее подходящих слов. Чем ниже значение, тем меньше риск «галлюцинаций» и странных оборотов, но выше шанс получить банальный ответ.</small>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>🔝 Top K: <span id="topk-value">50</span></label>
+                        <input type="range" id="top-k" min="1" max="200" step="1" value="50">
+                        <small>В отличие от Top P, этот параметр ограничивает выборку строго по количеству слов. Помогает избежать низковероятных «галлюцинаций», когда модель уходит в сторону от темы.</small>
+                    </div>
+                </div>
+
+                <div class="expandable-section">
+                    <button class="expandable-header" id="advancedToggle">
+                        <i class="fas fa-cog"></i>
+                        <span>Расширенные настройки</span>
+                        <i class="fas fa-chevron-down expand-icon"></i>
+                    </button>
+                    <div class="expandable-content" id="advancedContent">
+                        <div class="setting-group">
+                            <label>🔄 Штраф за повторение: <span id="freq-value">0.0</span></label>
+                            <input type="range" id="frequency-penalty" min="-2" max="2" step="0.05" value="0.0">
+                            <small>Положительные значения уменьшают вероятность повторения слов, которые уже встречались в тексте.</small>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>💭 Штраф за новые темы: <span id="presence-value">0.0</span></label>
+                            <input type="range" id="presence-penalty" min="-2" max="2" step="0.05" value="0.0">
+                            <small>Положительные значения делают модель «любопытнее», заставляя её чаще переходить к новым деталям, вместо того чтобы крутиться вокруг уже сказанного.</small>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>📝 Альт. штраф повтора: <span id="repeat-value">1.0</span></label>
+                            <input type="range" id="repeat-penalty" min="0.8" max="1.5" step="0.01" value="1.1">
+                            <small>&gt;В отличие от обычного штрафа, этот сильнее влияет на общую структуру текста. Используйте значения чуть выше 1.0, чтобы сделать речь более естественной и избежать монотонности.</small>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>📏 Max tokens: <span id="max-tokens-value">2000</span></label>
+                            <input type="range" id="max-tokens" min="100" max="20000" step="50" value="2000">
+                            <small>Устанавливает жесткую границу объема ответа. Один токен — это примерно 3-4 символа на русском языке.</small>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>🌱 Seed:</label>
+                            <input type="number" id="seed" placeholder="Оставьте пустым">
+                            <small>Одинаковый seed = одинаковый ответ</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="drawer-actions">
+                    <button id="clear-chat-btn" class="action-btn clear-btn">
+                        <i class="fas fa-trash-alt"></i> Очистить диалог
+                    </button>
+                    <button id="reset-settings-btn" class="action-btn reset-btn">
+                        <i class="fas fa-undo-alt"></i> Сбросить настройки
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="drawer-overlay" id="drawerOverlay"></div>
+
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="header-left">
+                    <button class="open-drawer-btn" id="openDrawerBtn">
+                        <i class="fas fa-sliders-h"></i>
+                    </button>
+                    <h1>💬 Chat</h1>
+                </div>
+                <div class="header-right">
+                    <div class="context-indicator" id="context-indicator">
+                        <i class="fas fa-brain"></i>
+                        <span id="context-count">0</span> сообщ.
+                    </div>
+                    <div class="status" id="status">
+                        <span class="status-dot"></span>
+                        <span>Готов</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="messages" id="messages">
+                <div class="message assistant">
+                    <div class="avatar">🤖</div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            <strong>👋 Привет! Я готов помочь!</strong><br><br>
+                            📌 <strong>Возможности:</strong><br>
+                            • 🧠 Помню весь диалог в рамках одной сессии<br>
+                            • 🖼️ Поддержка изображений (модели Vision)<br>
+                            • ⚙️ Настрой параметры через меню слева<br>
+                            • 💡 Для быстрой обработки изображений используйте размер до 1024px<br><br>
+                            Задавай вопросы или загружай изображения для анализа!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <textarea id="user-input" placeholder="Введите сообщение... (Enter для отправки, Shift+Enter для новой строки)" rows="3"></textarea>
+                <button id="send-btn" class="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Отправить</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="copy-notification" class="copy-notification">
+        <i class="fas fa-check-circle"></i> Скопировано!
+    </div>
+
+
+<script src="{{ url_for('static', filename='js/scii.js') }}"></script>
+
+</body>
+</html>
