@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документы - Flask App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .user-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* ===== Хлебные крошки ===== */
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: #667eea;
+            text-decoration: none;
+            padding: 4px 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .breadcrumbs a:hover {
+            background: #e8eaff;
+            color: #764ba2;
+        }
+
+        .breadcrumbs .separator {
+            color: #ccc;
+            font-weight: bold;
+        }
+
+        .breadcrumbs .current {
+            color: #333;
+            font-weight: 600;
+            padding: 4px 10px;
+        }
+
+        /* ===== Панель инструментов ===== */
+        .toolbar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-back:hover {
+            background: #764ba2;
+            transform: translateY(-1px);
+        }
+
+        .btn-back:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== Секция папок ===== */
+        .folders-section {
+            margin-bottom: 25px;
+        }
+
+        .folders-section h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .folders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .folder-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: #f8f9ff;
+            border: 2px solid #e8eaff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .folder-card:hover {
+            background: #e8eaff;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .folder-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .folder-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .folder-name {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .folder-count {
+            font-size: 12px;
+            color: #999;
+            margin-top: 3px;
+        }
+
+        /* ===== Таблица файлов ===== */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        th .sort-icon {
+            margin-left: 5px;
+            font-size: 12px;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        /* Ограничение ширины названия */
+        td:nth-child(2) {
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* При наведении показывать полное название */
+        td:nth-child(2):hover {
+            overflow: visible;
+            white-space: normal;
+            word-break: break-word;
+            background: #fff;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            padding: 12px 15px;
+        }
+        tbody tr {
+            transition: background 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9ff;
+        }
+
+        /* Новые строки (анимация) */
+        tr.new-row {
+            animation: fadeInRow 0.5s ease;
+        }
+
+        @keyframes fadeInRow {
+            from { opacity: 0; transform: translateY(-10px); background: #ebf8ff; }
+            to { opacity: 1; transform: translateY(0); background: transparent; }
+        }
+
+        /* Индикатор просмотра */
+        .viewed-indicator {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .viewed-indicator.not-viewed {
+            background: #e8eaff;
+            color: #667eea;
+        }
+
+        .viewed-indicator.viewed {
+            background: #d4edda;
+            color: #28a745;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-open {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-open:hover {
+            background: #5a6fd6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-preview {
+            background: #f0f0ff;
+            color: #667eea;
+            border: 1px solid #667eea;
+        }
+
+        .btn-preview:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .file-type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-pdf { background: #ffebee; color: #e74c3c; }
+        .badge-docx, .badge-doc { background: #e3f2fd; color: #2196f3; }
+        .badge-wav, .badge-audio { background: #f3e5f5; color: #9c27b0; }
+        .badge-image { background: #e8f5e9; color: #4caf50; }
+        .badge-txt { background: #fff3e0; color: #ff9800; }
+        .badge-excel { background: #e8f5e9; color: #388e3c; }
+        .badge-pptx, .badge-ppt { background: #fce4ec; color: #c62828; }
+        .badge-video { background: #e8eaf6; color: #3f51b5; }
+        .badge-other { background: #f5f5f5; color: #616161; }
+
+        /* ===== Кнопка "Показать ещё" ===== */
+        .btn-load-more {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-load-more:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-load-more:active {
+            transform: translateY(0);
+        }
+
+        .btn-load-more:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-load-more .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .btn-load-more.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-load-more.loading .btn-text {
+            display: none;
+        }
+
+        .btn-load-more.loading::after {
+            content: 'Загрузка...';
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-items {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .no-items .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* ===== Модальное окно ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-dialog {
+            background: white;
+            border-radius: 15px;
+            width: 95%;
+            max-width: 1000px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.5);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 2px solid #f0f0f0;
+            background: #fafafa;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #c0392b;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 300px;
+            background: #f5f5f5;
+        }
+
+        .modal-body img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-body pre {
+            width: 100%;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .modal-body audio {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .modal-body video {
+            max-width: 100%;
+            max-height: 65vh;
+            border-radius: 8px;
+        }
+
+        .modal-body embed {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .modal-error {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .modal-error .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .modal-error h4 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 25px;
+            border-top: 2px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #fafafa;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .btn-modal {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-modal-download {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-modal-download:hover {
+            background: #5a6fd6;
+        }
+
+        .btn-modal-close {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-modal-close:hover {
+            background: #ccc;
+        }
+
+        .modal-loading {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .modal-loading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .toolbar {
+                flex-direction: column;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .folders-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 Документы</h1>
+            <div class="user-info">
+                <div class="user-badge">
+                    👤 {{ user_name }} ({{ user_role }})
+                </div>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">🏠 Главная</a>
+                    <a href="/dashboard" class="nav-link">📊 Дашборд</a>
+                </div>
+                <form action="/logout" method="get" style="margin: 0;">
+                    <button type="submit" class="logout-btn">🚪 Выйти</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Хлебные крошки -->
+            <div class="breadcrumbs">
+                {% for crumb in breadcrumbs %}
+                    {% if not loop.last %}
+                        <a href="/documents?path={{ crumb.path }}">{{ crumb.name }}</a>
+                        <span class="separator">›</span>
+                    {% else %}
+                        <span class="current">{{ crumb.name }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Панель инструментов — только поиск -->
+            <div class="toolbar">
+                <input type="text"
+                       class="search-input"
+                       id="searchInput"
+                       placeholder="🔍 Поиск по всем документам...">
+            </div>
+
+            <!-- Папки -->
+            {% if folders %}
+            <div class="folders-section" id="foldersSection">
+                <h3>📂 Папки</h3>
+                <div class="folders-grid">
+                    {% for folder in folders %}
+                    <a href="/documents?path={{ folder.path }}" class="folder-card" data-name="{{ folder.name|lower }}">
+                        <div class="folder-icon">📁</div>
+                        <div class="folder-info">
+                            <div class="folder-name">{{ folder.name }}</div>
+                            <div class="folder-count">{{ folder.file_count }} файлов</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Файлы -->
+            <div class="table-container">
+                <table id="filesTable">
+                    <thead>
+                        <tr>
+                            <th>👁️</th>
+                            <th onclick="sortTable(1)">Название <span class="sort-icon">⇅</span></th>
+                            <th onclick="sortTable(2)">Дата <span class="sort-icon">⇅</span></th>
+                            <th onclick="sortTable(3)">Тип <span class="sort-icon">⇅</span></th>
+                            <th onclick="sortTable(4)">Размер <span class="sort-icon">⇅</span></th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filesBody">
+                        <!-- Заполняется через JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Кнопка "Показать ещё" -->
+            <button class="btn-load-more" id="loadMoreBtn" style="display: none;">
+                <span class="spinner"></span>
+                <span class="btn-text">📥 Показать ещё 10 документов</span>
+            </button>
+
+            <div class="stats">
+                <span id="statsInfo">📄 Загрузка...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 id="modalTitle">📄 Предпросмотр</h3>
+                <button class="modal-close" onclick="closePreview()">✖</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="modal-loading">
+                    <div class="spinner"></div>
+                    <p>Загрузка...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn-modal btn-modal-download" id="modalDownloadBtn" download>
+                    💾 Скачать
+                </a>
+                <button class="btn-modal btn-modal-close" onclick="closePreview()">
+                    ✖ Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // ДАННЫЕ (передаются из Jinja2 в JavaScript)
+        // ============================================
+        const allFiles = [
+            {% for file in files %}
+            {
+                path: "{{ file.path }}",
+                title: "{{ file.title }}",
+                date: "{{ file.date }}",
+                type: "{{ file.type }}",
+                extension: "{{ file.extension }}",
+                size: "{{ file.size }}",
+                dateRaw: "{{ file.date }}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // ============================================
+        // СОСТОЯНИЕ ПРОСМОТРОВ (sessionStorage — живёт до закрытия вкладки)
+        // ============================================
+        const VIEWED_KEY = 'viewed_files';
+
+        function getViewedFiles() {
+            try {
+                return JSON.parse(sessionStorage.getItem(VIEWED_KEY)) || {};
+            } catch(e) {
+                return {};
+            }
+        }
+
+        function markAsViewed(filePath) {
+            const viewed = getViewedFiles();
+            viewed[filePath] = true;
+            sessionStorage.setItem(VIEWED_KEY, JSON.stringify(viewed));
+        }
+
+        function isViewed(filePath) {
+            return getViewedFiles()[filePath] === true;
+        }
+
+        // ============================================
+        // ПАГИНАЦИЯ
+        // ============================================
+        const ROWS_PER_PAGE = 10;
+        let displayedCount = 0;
+
+        // Сортируем: от новых к старым
+        allFiles.sort((a, b) => b.dateRaw.localeCompare(a.dateRaw));
+
+        function loadMoreRows() {
+            const tbody = document.getElementById('filesBody');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+            const start = displayedCount;
+            const end = Math.min(start + ROWS_PER_PAGE, allFiles.length);
+            const chunk = allFiles.slice(start, end);
+
+            if (chunk.length === 0) {
+                loadMoreBtn.style.display = 'none';
+                updateStats();
+                return;
+            }
+
+            chunk.forEach((file, index) => {
+                const row = document.createElement('tr');
+                row.dataset.file = file.path;
+                row.dataset.type = file.type;
+                row.dataset.name = file.title.toLowerCase();
+
+                const viewedClass = isViewed(file.path) ? 'viewed' : 'not-viewed';
+                const viewedIcon = isViewed(file.path) ? '✅' : '👁️';
+                const viewedTitle = isViewed(file.path) ? 'Просмотрено' : 'Не просмотрено';
+
+                row.innerHTML = `
+                    <td>
+                        <span class="viewed-indicator ${viewedClass}"
+                              title="${viewedTitle}"
+                              data-file="${file.path}">
+                            ${viewedIcon}
+                        </span>
+                    </td>
+                    <td><strong>${escapeHtml(file.title)}</strong></td>
+                    <td>${file.date}</td>
+                    <td>
+                        <span class="file-type-badge badge-${file.type}">
+                            ${file.extension.toUpperCase()}
+                        </span>
+                    </td>
+                    <td>${file.size}</td>
+                    <td>
+                        <div class="actions-cell">
+                            <a href="/api/view-document/${file.path}"
+                               target="_blank"
+                               class="btn-action btn-open open-link"
+                               data-file="${file.path}"
+                               title="Открыть в новой вкладке">
+                                🔗 Открыть
+                            </a>
+                            <button class="btn-action btn-preview preview-btn"
+                                    data-file="${file.path}"
+                                    data-ext="${file.extension}"
+                                    title="Предпросмотр в окне">
+                                👁️ Просмотр
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            // Вешаем обработчики на новые кнопки
+            attachRowEvents();
+
+            displayedCount = end;
+
+            // Обновляем кнопку
+            if (displayedCount >= allFiles.length) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'block';
+                const remaining = allFiles.length - displayedCount;
+                const nextLoad = Math.min(remaining, ROWS_PER_PAGE);
+                loadMoreBtn.querySelector('.btn-text').textContent =
+                    `📥 Показать ещё ${nextLoad} документов (осталось ${remaining})`;
+            }
+
+            updateStats();
+
+            // Убираем анимацию
+            setTimeout(() => {
+                document.querySelectorAll('.new-row').forEach(r => r.classList.remove('new-row'));
+            }, 600);
+        }
+
+        function attachRowEvents() {
+            // Кнопки "Открыть" — отмечаем как просмотрено
+            document.querySelectorAll('.open-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const filePath = this.dataset.file;
+                    markAsViewed(filePath);
+                    updateViewedIndicator(filePath);
+                });
+            });
+
+            // Кнопки "Просмотр" (модалка)
+            document.querySelectorAll('.preview-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const filePath = this.dataset.file;
+                    const ext = this.dataset.ext;
+                    markAsViewed(filePath);
+                    updateViewedIndicator(filePath);
+                    openPreview(filePath, ext);
+                });
+            });
+        }
+
+        function updateViewedIndicator(filePath) {
+            const indicator = document.querySelector(`.viewed-indicator[data-file="${filePath}"]`);
+            if (indicator) {
+                indicator.classList.remove('not-viewed');
+                indicator.classList.add('viewed');
+                indicator.textContent = '✅';
+                indicator.title = 'Просмотрено';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('statsInfo').textContent =
+                `📄 Показано ${displayedCount} из ${allFiles.length} документов`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+       // ============================================
+// ============================================
+// ПОИСК ПО ВСЕМ ДОКУМЕНТАМ
+// ============================================
+document.getElementById('searchInput').addEventListener('input', function() {
+    const searchText = this.value.toLowerCase().trim();
+
+    if (!searchText) {
+        // Поиск пустой — возвращаем первые 10
+        resetToInitial();
+    } else {
+        // Ищем по ВСЕМ документам
+        const matchedFiles = allFiles.filter(file => {
+            return file.title.toLowerCase().includes(searchText) ||
+                   file.path.toLowerCase().includes(searchText);
+        });
+
+        renderSearchResults(matchedFiles);
+        document.getElementById('loadMoreBtn').style.display = 'none';
+    }
+});
+
+function resetToInitial() {
+    // Очищаем таблицу
+    document.getElementById('filesBody').innerHTML = '';
+    displayedCount = 0;
+
+    // Загружаем первые 10
+    loadMoreRows();
+
+    // Показываем кнопку если есть ещё
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (allFiles.length > ROWS_PER_PAGE) {
+        loadMoreBtn.style.display = 'block';
+    }
+
+    // Фильтруем папки обратно
+    document.querySelectorAll('.folder-card').forEach(card => {
+        card.style.display = '';
+    });
+}
+
+function renderSearchResults(matchedFiles) {
+    const tbody = document.getElementById('filesBody');
+    tbody.innerHTML = '';
+
+    // Скрываем папки при поиске
+    document.querySelectorAll('.folder-card').forEach(card => {
+        card.style.display = 'none';
+    });
+
+    if (matchedFiles.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    <div class="no-items">
+                        <div class="icon">🔍</div>
+                        <p>Ничего не найдено</p>
+                    </div>
+                </td>
+            </tr>`;
+        document.getElementById('statsInfo').textContent = '🔍 Ничего не найдено';
+        return;
+    }
+
+    matchedFiles.forEach((file) => {
+        const viewedClass = isViewed(file.path) ? 'viewed' : 'not-viewed';
+        const viewedIcon = isViewed(file.path) ? '✅' : '👁️';
+        const viewedTitle = isViewed(file.path) ? 'Просмотрено' : 'Не просмотрено';
+
+        const row = document.createElement('tr');
+        row.dataset.file = file.path;
+        row.dataset.type = file.type;
+        row.dataset.name = file.title.toLowerCase();
+        row.dataset.index = allFiles.indexOf(file);
+
+        row.innerHTML = `
+            <td>
+                <span class="viewed-indicator ${viewedClass}"
+                      title="${viewedTitle}"
+                      data-file="${file.path}">
+                    ${viewedIcon}
+                </span>
+            </td>
+            <td><strong>${escapeHtml(file.title)}</strong></td>
+            <td>${file.date}</td>
+            <td>
+                <span class="file-type-badge badge-${file.type}">
+                    ${file.extension.toUpperCase()}
+                </span>
+            </td>
+            <td>${file.size}</td>
+            <td>
+                <div class="actions-cell">
+                    <a href="/api/view-document/${file.path}"
+                       target="_blank"
+                       class="btn-action btn-open open-link"
+                       data-file="${file.path}"
+                       title="Открыть в новой вкладке">
+                        🔗 Открыть
+                    </a>
+                    <button class="btn-action btn-preview preview-btn"
+                            data-file="${file.path}"
+                            data-ext="${file.extension}"
+                            title="Предпросмотр в окне">
+                        👁️ Просмотр
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    attachRowEvents();
+    document.getElementById('statsInfo').textContent =
+        `🔍 Найдено ${matchedFiles.length} из ${allFiles.length} документов`;
+}
+
+        // ============================================
+        // КНОПКА "ПОКАЗАТЬ ЕЩЁ"
+        // ============================================
+        document.getElementById('loadMoreBtn').addEventListener('click', function() {
+            const btn = this;
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            setTimeout(() => {
+                loadMoreRows();
+                btn.classList.remove('loading');
+                btn.disabled = false;
+
+            }, 400);
+        });
+
+        // ============================================
+        // МОДАЛЬНОЕ ОКНО
+        // ============================================
+        const modal = document.getElementById('previewModal');
+        const modalBody = document.getElementById('modalBody');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDownloadBtn = document.getElementById('modalDownloadBtn');
+
+        function openPreview(filePath, extension) {
+            modal.classList.add('active');
+            modalTitle.innerHTML = `📄 ${filePath.split('/').pop()}`;
+            modalDownloadBtn.href = `/documents/${filePath}`;
+
+            modalBody.innerHTML = `
+                <div class="modal-loading">
+                    <div class="spinner"></div>
+                    <p>Загрузка предпросмотра...</p>
+                </div>
+            `;
+
+            const ext = extension.toLowerCase();
+
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'ico'].includes(ext)) {
+                loadImagePreview(filePath);
+            } else if (['wav', 'mp3', 'ogg', 'flac', 'm4a', 'aac'].includes(ext)) {
+                loadAudioPreview(filePath, ext);
+            } else if (ext === 'pcm') {
+    loadPcmPreview(filePath);  // Отдельная функция для PCM
+            } else if (['mp4', 'webm', 'avi', 'mov', 'mkv'].includes(ext)) {
+                loadVideoPreview(filePath, ext);
+            } else if (ext === 'pdf') {
+                loadPdfPreview(filePath);
+            } else if (['txt', 'log', 'csv', 'md', 'py', 'js', 'html', 'css', 'xml', 'json', 'yaml', 'yml', 'ini', 'cfg', 'sh', 'bat', 'sql'].includes(ext)) {
+                loadTextPreview(filePath);
+            } else if (['docx', 'doc'].includes(ext)) {
+                loadWordPreview(filePath);
+            } else if (ext === 'rtf') {                          // ✅ ДОБАВЬ ЭТО
+                loadRtfPreview(filePath);                       // ✅ RTF как текст
+            } else {
+                showModalError(filePath, `Формат .${ext} не поддерживается для предпросмотра.`);
+            }
+
+            document.addEventListener('keydown', handleEscKey);
+        }
+
+        function closePreview() {
+            modal.classList.remove('active');
+            modalBody.innerHTML = '';
+            document.removeEventListener('keydown', handleEscKey);
+            const audio = modalBody.querySelector('audio');
+            const video = modalBody.querySelector('video');
+            if (audio) audio.pause();
+            if (video) video.pause();
+        }
+
+        function handleEscKey(e) {
+            if (e.key === 'Escape') closePreview();
+        }
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closePreview();
+        });
+
+        function loadImagePreview(filePath) {
+            const img = new Image();
+            img.onload = function() {
+                modalBody.innerHTML = `<img src="/documents/${filePath}" alt="${filePath}" style="max-width: 100%; max-height: 70vh; object-fit: contain;">`;
+            };
+            img.onerror = function() {
+                showModalError(filePath, 'Изображение повреждено или имеет неверный формат.');
+            };
+            img.src = `/documents/${filePath}`;
+        }
+
+        function loadAudioPreview(filePath, ext) {
+            const mimeTypes = {'wav': 'audio/wav', 'mp3': 'audio/mpeg', 'ogg': 'audio/ogg', 'flac': 'audio/flac', 'm4a': 'audio/mp4', 'aac': 'audio/aac'};
+            const mimeType = mimeTypes[ext] || 'audio/wav';
+            modalBody.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 64px; margin-bottom: 20px;">🎵</div>
+                    <h4 style="margin-bottom: 20px;">${filePath.split('/').pop()}</h4>
+                    <audio controls autoplay style="width: 100%; max-width: 500px;"
+                           onerror="this.parentElement.innerHTML='<div class=\\'modal-error\\'><div class=\\'error-icon\\'>⚠️</div><h4>Ошибка воспроизведения</h4><p>Аудиофайл поврежден.</p></div>'">
+                        <source src="/documents/${filePath}" type="${mimeType}">
+                    </audio>
+                </div>`;
+        }
+
+        function loadVideoPreview(filePath, ext) {
+            const mimeTypes = {'mp4': 'video/mp4', 'webm': 'video/webm', 'avi': 'video/x-msvideo', 'mov': 'video/quicktime', 'mkv': 'video/x-matroska'};
+            const mimeType = mimeTypes[ext] || 'video/mp4';
+            modalBody.innerHTML = `
+                <video controls autoplay style="max-width: 100%; max-height: 65vh;"
+                       onerror="this.parentElement.innerHTML='<div class=\\'modal-error\\'><div class=\\'error-icon\\'>⚠️</div><h4>Ошибка воспроизведения</h4><p>Видеофайл поврежден.</p></div>'">
+                    <source src="/documents/${filePath}" type="${mimeType}">
+                </video>`;
+        }
+
+        function loadPdfPreview(filePath) {
+            modalBody.innerHTML = `
+                <embed src="/documents/${filePath}" type="application/pdf"
+                       style="width: 100%; height: 70vh; border: none; border-radius: 8px;"
+                       onerror="this.parentElement.innerHTML='<div class=\\'modal-error\\'><div class=\\'error-icon\\'>📕❌</div><h4>Ошибка загрузки PDF</h4><p>PDF-файл поврежден.</p></div>'">`;
+        }
+
+        function loadTextPreview(filePath) {
+            fetch(`/documents/${filePath}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Файл не найден');
+                    return response.text();
+                })
+                .then(text => {
+                    const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    modalBody.innerHTML = `<pre>${escaped}</pre>`;
+                })
+                .catch(error => {
+                    showModalError(filePath, `Не удалось загрузить текст: ${error.message}`);
+                });
+        }
+
+        function loadWordPreview(filePath) {
+            fetch(`/documents/${filePath}`)
+                .then(response => response.text())
+                .then(text => {
+                    const readable = text.replace(/[^\x20-\x7E\xA0-\xFF\u0400-\u04FF]/g, ' ').replace(/\s+/g, ' ').trim();
+                    if (readable.length > 50) {
+                        const escaped = readable.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        modalBody.innerHTML = `
+                            <div style="width: 100%;">
+                                <div style="background: #fff3cd; padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; color: #856404; font-size: 14px;">
+                                    ⚠️ Это извлеченный текст. Для полного просмотра откройте файл в Word.
+                                </div>
+                                <pre>${escaped}</pre>
+                            </div>`;
+                    } else {
+                        showModalError(filePath, 'Не удалось извлечь текст. Файл может быть поврежден.');
+                    }
+                })
+                .catch(() => showModalError(filePath, 'Ошибка загрузки. Файл может быть поврежден.'));
+        }
+
+        function showModalError(filePath, message) {
+            modalBody.innerHTML = `
+                <div class="modal-error">
+                    <div class="error-icon">⚠️</div>
+                    <h4>Невозможно отобразить</h4>
+                    <p><strong>${filePath.split('/').pop()}</strong></p>
+                    <p>${message}</p>
+                    <button class="btn-modal btn-modal-download" onclick="window.open('/api/view-document/${filePath}', '_blank')" style="margin-right: 10px;">
+                        🔗 Открыть в новой вкладке
+                    </button>
+                    <a href="/documents/${filePath}" download class="btn-modal btn-modal-download">
+                        💾 Скачать файл
+                    </a>
+                </div>`;
+        }
+
+        // ============================================
+        // ИНИЦИАЛИЗАЦИЯ
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            if (allFiles.length > 0) {
+                loadMoreRows();
+            } else {
+                document.getElementById('filesBody').innerHTML = `
+                    <tr>
+                        <td colspan="6">
+                            <div class="no-items">
+                                <div class="icon">📭</div>
+                                <p>Нет файлов в этой папке</p>
+                            </div>
+                        </td>
+                    </tr>`;
+                document.getElementById('statsInfo').textContent = '📄 Нет документов';
+            }
+        });
+        function loadRtfPreview(filePath) {
+    // Загружаем уже обработанный текст через API
+    fetch(`/api/view-document/${filePath}`)
+        .then(response => response.text())
+        .then(html => {
+            // Извлекаем текст из HTML (между <pre> и </pre>)
+            const match = html.match(/<pre>(.*?)<\/pre>/s);
+            if (match) {
+                const text = match[1]
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&quot;/g, '"');
+                modalBody.innerHTML = `<pre>${text}</pre>`;
+            } else {
+                showModalError(filePath, 'Не удалось извлечь текст.');
+            }
+        })
+        .catch(() => {
+            showModalError(filePath, 'Ошибка загрузки.');
+        });
+}
+        // ============================================
+// СОРТИРОВКА ТАБЛИЦЫ
+// ============================================
+let currentSortColumn = -1;
+let currentSortDirection = 1;
+
+function sortTable(columnIndex) {
+    const tbody = document.getElementById('filesBody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    if (rows.length === 0) return;
+
+    if (currentSortColumn === columnIndex) {
+        currentSortDirection *= -1;
+    } else {
+        currentSortColumn = columnIndex;
+        currentSortDirection = 1;
+    }
+
+    rows.sort((a, b) => {
+        let aVal = a.cells[columnIndex]?.textContent.trim() || '';
+        let bVal = b.cells[columnIndex]?.textContent.trim() || '';
+
+        // Для размера — парсим числа
+        if (columnIndex === 4) {
+            return (parseFileSize(aVal) - parseFileSize(bVal)) * currentSortDirection;
+        }
+        // Для даты
+        if (columnIndex === 2) {
+            return aVal.localeCompare(bVal) * currentSortDirection;
+        }
+        // Для остального
+        return aVal.localeCompare(bVal, 'ru') * currentSortDirection;
+    });
+
+    // Переставляем строки
+    rows.forEach(row => tbody.appendChild(row));
+
+    // Обновляем иконки
+    document.querySelectorAll('th .sort-icon').forEach(icon => {
+        icon.textContent = '⇅';
+    });
+    const icons = document.querySelectorAll('th .sort-icon');
+    if (icons[columnIndex]) {
+        icons[columnIndex].textContent = currentSortDirection === 1 ? '↑' : '↓';
+    }
+}
+
+function parseFileSize(sizeStr) {
+    const units = {'B': 1, 'KB': 1024, 'MB': 1048576, 'GB': 1073741824};
+    const match = sizeStr.match(/([\d.]+)\s*(B|KB|MB|GB)/i);
+    if (match) return parseFloat(match[1]) * (units[match[2].toUpperCase()] || 1);
+    return 0;
+}
+
+// ============================================
+// ПОИСК И ФИЛЬТРАЦИЯ
+// ============================================
+document.getElementById('searchInput').addEventListener('input', function() {
+    filterFiles();
+});
+
+document.getElementById('typeFilter').addEventListener('change', function() {
+    filterFiles();
+});
+
+function filterFiles() {
+    const searchText = document.getElementById('searchInput').value.toLowerCase();
+    const typeFilter = document.getElementById('typeFilter').value;
+
+    // Фильтруем папки
+    document.querySelectorAll('.folder-card').forEach(card => {
+        const name = card.dataset.name || '';
+        if (typeFilter === 'folders') {
+            card.style.display = name.includes(searchText) ? '' : 'none';
+        } else if (typeFilter === 'all') {
+            card.style.display = name.includes(searchText) ? '' : 'none';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Показываем/скрываем секцию папок
+    const foldersSection = document.getElementById('foldersSection');
+    if (typeFilter === 'all' || typeFilter === 'folders') {
+        foldersSection.style.display = '';
+    } else {
+        foldersSection.style.display = 'none';
+    }
+
+    // Фильтруем файлы
+    document.querySelectorAll('#filesBody tr').forEach(row => {
+        const name = (row.dataset.name || '').toLowerCase();
+        const rowType = row.dataset.type || '';
+        const title = row.cells[1]?.textContent.toLowerCase() || '';
+        const ext = (row.cells[3]?.textContent || '').toLowerCase().trim();
+
+        const matchesSearch = name.includes(searchText) || title.includes(searchText);
+
+        // Сопоставление типов
+        let matchesType = false;
+        if (typeFilter === 'all') {
+            matchesType = true;
+        } else if (typeFilter === 'folders') {
+            matchesType = false;
+        } else if (typeFilter === 'docx') {
+            matchesType = (rowType === 'docx');
+        } else if (typeFilter === 'pdf') {
+            matchesType = (rowType === 'pdf');
+        } else if (typeFilter === 'wav' || typeFilter === 'audio') {
+            matchesType = (rowType === 'wav' || rowType === 'audio');
+        } else if (typeFilter === 'image') {
+            matchesType = (rowType === 'image');
+        } else if (typeFilter === 'video') {
+            matchesType = (rowType === 'video');
+        } else if (typeFilter === 'txt') {
+            matchesType = (rowType === 'txt');
+        } else if (typeFilter === 'excel') {
+            matchesType = (rowType === 'excel');
+        } else if (typeFilter === 'pptx') {
+            matchesType = (rowType === 'pptx');
+        } else if (typeFilter === 'other') {
+            matchesType = (rowType === 'other');
+        } else {
+            matchesType = (rowType === typeFilter);
+        }
+
+        if (typeFilter === 'folders') {
+            row.style.display = 'none';
+        } else {
+            row.style.display = (matchesSearch && matchesType) ? '' : 'none';
+        }
+    });
+}
+    function loadPcmPreview(filePath) {
+    fetch(`/api/view-document/${filePath}`)
+        .then(response => response.text())
+        .then(html => {
+            const match = html.match(/<audio[^>]*>.*?<\/audio>/s);
+            if (match) {
+                modalBody.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">🎵</div>
+                        <h4 style="margin-bottom: 20px;">${filePath.split('/').pop()}</h4>
+                        ${match[0]}
+                    </div>`;
+            } else {
+                showModalError(filePath, 'Не удалось загрузить PCM аудио.');
+            }
+        })
+        .catch(() => showModalError(filePath, 'Ошибка загрузки PCM.'));
+}
+    </script>
+</body>
+</html>
