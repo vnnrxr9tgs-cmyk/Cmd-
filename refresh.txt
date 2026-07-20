@@ -1,0 +1,59 @@
+async function refreshDocuments() {
+    const tbody = document.getElementById('filesBody');
+    const btn = document.getElementById('loadMoreBtn');
+    const stats = document.getElementById('statsInfo');
+    
+    btn.style.display = 'none';
+    stats.textContent = '📄 Обновление...';
+    
+    try {
+        const response = await fetch('/documents?json=1');
+        const data = await response.json();
+        
+        // ✅ Полностью очищаем ВСЁ
+        tbody.innerHTML = '';
+        allFiles.length = 0;
+        data.files.forEach(f => allFiles.push(f));
+        allFiles.sort((a, b) => b.date.localeCompare(a.date));
+        
+        // ✅ Сбрасываем счётчики
+        displayedCount = 0;
+        currentSortColumn = -1;
+        currentSortDirection = 1;
+        
+        // ✅ Загружаем первые 10 заново
+        loadMoreRows();
+        
+        // ✅ Обновляем папки (если есть на странице)
+        if (data.folders) {
+            const foldersSection = document.getElementById('foldersSection');
+            const foldersGrid = document.querySelector('.folders-grid');
+            if (foldersGrid && data.folders.length > 0) {
+                foldersGrid.innerHTML = data.folders.map(f => 
+                    `<a href="/documents?path=${f.path}" class="folder-card" data-name="${f.name.toLowerCase()}">
+                        <div class="folder-icon">📁</div>
+                        <div class="folder-info">
+                            <div class="folder-name">${f.name}</div>
+                            <div class="folder-count">${f.file_count} файлов</div>
+                        </div>
+                    </a>`
+                ).join('');
+            }
+            if (foldersSection) {
+                foldersSection.style.display = data.folders.length > 0 ? '' : 'none';
+            }
+        }
+        
+        stats.textContent = `📄 Показано ${displayedCount} из ${allFiles.length} документов`;
+        
+    } catch (error) {
+        stats.textContent = '❌ Ошибка обновления';
+    }
+}
+
+и 
+if request.args.get('json') == '1':
+    return jsonify({
+        'files': files,
+        'folders': folders
+    })
