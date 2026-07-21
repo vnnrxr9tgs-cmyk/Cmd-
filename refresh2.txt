@@ -1,0 +1,17 @@
+// Используем localStorage для быстрого доступа
+function getViewedFiles() {
+    return JSON.parse(localStorage.getItem(VIEWED_KEY)) || {};
+}
+
+function markAsViewed(filePath) {
+    const v = getViewedFiles();
+    v[filePath] = true;
+    localStorage.setItem(VIEWED_KEY, JSON.stringify(v));
+    
+    // Асинхронно сохраняем на сервер (не ждём ответа)
+    fetch('/api/viewed/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({filepath: filePath})
+    }).catch(() => {}); // ошибка не критична
+}
