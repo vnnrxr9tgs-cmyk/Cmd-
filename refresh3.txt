@@ -1,0 +1,44 @@
+#header
+def search_multiple(values):
+    """
+    Поиск нескольких значений в таблице TABLE1
+    Возвращает словарь {значение: [найденные_строки]}
+    """
+    conn = _get_conn()
+    cursor = conn.cursor()
+
+    results = {}
+    for val in values:
+        cursor.execute(
+            f"SELECT [{COL_FILENAME}], [{COL_SECONDNAME}] FROM {TABLE1} WHERE [{COL_FILENAME}] LIKE ?",
+            [f"%{val}%"]
+        )
+        columns = [c[0] for c in cursor.description]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        if rows:
+            results[val] = rows
+
+    conn.close()
+    return results
+
+
+@app.route('/batch_search')
+@login_required
+def batch_search():
+    return render_template('batch_search.html',
+                           username=session.get('username'),
+                           user_role=session.get('user_role'),
+                           user_name=session.get('user_name'))
+
+
+@app.route('/api/batch/search', methods=['POST'])
+@login_required
+def api_batch_search():
+    data = request.get_json()
+    values = data.get('values', [])
+    results = search_multiple(values)
+    return jsonify({
+        'results': results,
+        'total': len(values),
+        'found': len(results)
+    })
