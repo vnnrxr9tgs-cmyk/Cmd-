@@ -1,0 +1,11 @@
+{
+    "server_url": "http://127.0.0.1:5000",
+    "hostname": "server-1",
+    "interval": 2,
+    "processes": [
+        "python3.12.exe",
+        "browser.exe",
+        "test_hang.exe",
+        "pycharm64.exe"
+    ]
+}
