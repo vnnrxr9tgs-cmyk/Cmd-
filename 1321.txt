@@ -1,0 +1,28 @@
+-- Перед запуском выберите вашу базу (например: USE students;)
+USE Имя_Вашей_БД;
+GO
+SELECT 
+    OBJECT_NAME(ips.object_id) AS [Таблица],
+    i.name AS [Индекс],
+    ROUND(ips.avg_fragmentation_in_percent, 2) AS [Фрагментация %],
+    ips.page_count AS [Объем (в страницах)]
+FROM sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, 'LIMITED') ips
+INNER JOIN sys.indexes i ON ips.object_id = i.object_id AND ips.index_id = i.index_id
+WHERE ips.page_count > 10 -- Пропускаем крошечные таблицы
+ORDER BY [Фрагментация %] DESC;
+
+ALTER INDEX ALL ON Имя_Таблицы REORGANIZE;
+ALTER INDEX ALL ON Имя_Таблицы REORGANIZE;
+################
+SELECT 
+    TABLE_NAME AS 'Таблица',
+    ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024, 2) AS 'Общий размер (МБ)',
+    ROUND(DATA_FREE / 1024 / 1024, 2) AS 'Мусор / Дыры (МБ)',
+    ROUND((DATA_FREE / (DATA_LENGTH + INDEX_LENGTH + 0.0001)) * 100, 2) AS 'Процент загрязнения'
+FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = 'Имя_Вашей_Базы' -- <--- Впишите сюда имя БД (например: 'students')
+ORDER BY DATA_FREE DESC;
+
+-- Перед запуском выберите базу (USE имя_базы;)
+OPTIMIZE TABLE Имя_Таблицы;
+OPTIMIZE TABLE unitsall.orders; 
