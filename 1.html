@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Удаление завершено</title>
+
+    <style>
+        /* -----------------------------------------------
+           RESET & BASE
+        ----------------------------------------------- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #1a2d44;
+            background: radial-gradient(ellipse at 50% -10%, #ffffff 0%, #f5f9fe 42%, #ecf2f9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        :root {
+            --text: #1a2d44;
+            --muted: #6e849e;
+            --green: #4fc17a;
+            --green-dark: #2d8a54;
+            --shadow: 0 30px 70px rgba(40, 65, 100, 0.10), 0 6px 20px rgba(40, 65, 100, 0.04);
+            --cycle: 8s;
+        }
+
+        /* -----------------------------------------------
+           PAGE WRAPPER
+        ----------------------------------------------- */
+        .page {
+            width: min(800px, 100%);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* -----------------------------------------------
+           NAVIGATION
+        ----------------------------------------------- */
+        .nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 22px;
+            height: 48px;
+            border-radius: 16px;
+            border: 1px solid #dde6f2;
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 3px 12px rgba(40, 65, 100, 0.03);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .nav a:hover {
+            transform: translateY(-2px);
+            border-color: #b2c9ed;
+            box-shadow: 0 10px 28px rgba(40, 65, 100, 0.08);
+        }
+
+        .nav a.primary {
+            border-color: #acc6f5;
+            color: #3f70ce;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        /* -----------------------------------------------
+           CARD
+        ----------------------------------------------- */
+        .card {
+            border-radius: 34px;
+            border: 1px solid rgba(210, 224, 240, 0.7);
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            backdrop-filter: blur(4px);
+            padding-bottom: 30px;
+        }
+
+        /* -----------------------------------------------
+           HEADER
+        ----------------------------------------------- */
+        .header {
+            text-align: center;
+            padding: 40px 30px 16px;
+        }
+
+        .icon-ring {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #68d08a, #43b36d);
+            box-shadow: 0 14px 36px rgba(60, 185, 110, 0.28);
+            animation: iconPop 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        }
+
+        .icon-ring::before {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 2px solid rgba(70, 190, 120, 0.12);
+        }
+
+        .check-mark {
+            width: 34px;
+            height: 20px;
+            border-left: 5px solid #fff;
+            border-bottom: 5px solid #fff;
+            border-radius: 3px;
+            transform: rotate(-45deg) translate(3px, -3px);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: clamp(30px, 4.2vw, 44px);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.12;
+            animation: fadeUp 0.7s 0.08s both;
+        }
+
+        .header .sub {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 17px;
+            animation: fadeUp 0.7s 0.16s both;
+        }
+
+        /* counter */
+        .badge-counter {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            margin: 20px auto 0;
+            padding: 14px 28px;
+            border-radius: 18px;
+            border: 1px solid #c9e3d4;
+            background: linear-gradient(135deg, #f3fbf7, #e9f6ee);
+            color: var(--green-dark);
+            font-weight: 600;
+            animation: fadeUp 0.7s 0.24s both;
+        }
+
+        .badge-counter .label {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .badge-counter .value {
+            font-size: 40px;
+            font-weight: 750;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        /* -----------------------------------------------
+           SCENE — центральная область с тремя состояниями
+        ----------------------------------------------- */
+        .scene-wrap {
+            position: relative;
+            height: 380px;
+            margin: 10px 20px 0;
+            overflow: hidden;
+            background: radial-gradient(ellipse at 50% 50%, #ffffff 0%, #f7faff 55%, #eef4fc 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(200, 215, 235, 0.4);
+        }
+
+        .scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* общий фон */
+        .glow-bg {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 500px;
+            height: 200px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(ellipse, rgba(120, 180, 240, 0.08), transparent 70%);
+            filter: blur(18px);
+            pointer-events: none;
+        }
+
+        /* -----------------------------------------------
+           ТРИ СОСТОЯНИЯ (перекрываются, центрированы)
+        ----------------------------------------------- */
+        .state {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            padding: 24px 20px 20px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 12px 40px rgba(60, 90, 130, 0.08);
+            backdrop-filter: blur(6px);
+            border: 2px solid transparent;
+            opacity: 0;
+            pointer-events: none;
+            transition: none;
+        }
+
+        /* Состояние 1: Исходные данные */
+        .state-source {
+            border-color: #d2e4f7;
+            animation: stateSource var(--cycle) ease-in-out infinite;
+        }
+
+        .state-source .tag {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #6e8bb0;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .src-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .src-row {
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #e2edf8;
+        }
+
+        .src-row .bar {
+            display: block;
+            height: 6px;
+            border-radius: 6px;
+            background: #d3dfec;
+        }
+
+        .src-row .bar:first-child {
+            width: 40px;
+        }
+        .src-row .bar:last-child {
+            width: 70px;
+            margin-left: 12px;
+        }
+
+        .src-row.dirty {
+            background: linear-gradient(90deg, #fff7f7, #ffefef);
+            border-color: #f3d2d2;
+        }
+
+        .src-row.dirty .bar {
+            background: #eab5b8;
+        }
+
+        .src-row .badge-x {
+            margin-left: auto;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #e88487;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Состояние 2: Облако "Вжухх, магия" */
+        .state-cloud {
+            border-color: #f5d98a;
+            background: radial-gradient(circle at 30% 30%, #fff9e6, #fde8b0);
+            box-shadow: 0 20px 60px rgba(230, 180, 50, 0.25);
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            font-weight: 800;
+            color: #a06b2b;
+            letter-spacing: 1px;
+            text-align: center;
+            padding: 0 20px;
+            animation: stateCloud var(--cycle) ease-in-out infinite;
+            border: 2px dashed rgba(255, 200, 80, 0.4);
+        }
+
+        .state-cloud::before {
+            content: "";
+            position: absolute;
+            inset: -12px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 200, 80, 0.2);
+            animation: spin 10s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Состояние 3: Чистые данные */
+        .state-result {
+            border-color: #b8dec9;
+            animation: stateResult var(--cycle) ease-in-out infinite;
+        }
+
+        .state-result .tag {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #4d9a6e;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .res-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .res-row {
+            height: 28px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 8px;
+            border: 1px solid #d3ecdd;
+            background: rgba(248, 255, 250, 0.92);
+        }
+
+        .res-row .bars {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .res-row .bars span {
+            display: block;
+            height: 5px;
+            border-radius: 5px;
+            background: #b8ddc5;
+        }
+
+        .res-row .bars span:first-child {
+            width: 40px;
+        }
+        .res-row .bars span:last-child {
+            width: 70px;
+        }
+
+        .res-row .check {
+            flex: 0 0 20px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--green);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* -----------------------------------------------
+           АНИМАЦИИ ДЛЯ ТРЁХ СОСТОЯНИЙ (цикл 8s)
+        ----------------------------------------------- */
+        @keyframes stateSource {
+            0%,
+            5% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            28% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            35% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.92);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.92);
+            }
+        }
+
+        @keyframes stateCloud {
+            0%,
+            33% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            38% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            58% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+            65% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+        }
+
+        @keyframes stateResult {
+            0%,
+            63% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.92);
+            }
+            70% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            92%,
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* -----------------------------------------------
+           ДОПОЛНИТЕЛЬНЫЕ АНИМАЦИИ
+        ----------------------------------------------- */
+        @keyframes iconPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.6);
+            }
+            65% {
+                transform: scale(1.06);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* -----------------------------------------------
+           RESPONSIVE
+        ----------------------------------------------- */
+        @media (max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+            .nav {
+                gap: 6px;
+                margin-bottom: 14px;
+            }
+            .nav a {
+                flex: 1;
+                min-width: 100px;
+                height: 42px;
+                padding: 0 12px;
+                font-size: 12px;
+                border-radius: 12px;
+            }
+            .card {
+                border-radius: 24px;
+                padding-bottom: 20px;
+            }
+            .header {
+                padding: 28px 16px 10px;
+            }
+            .header h1 {
+                font-size: 26px;
+            }
+            .header .sub {
+                font-size: 14px;
+            }
+            .badge-counter {
+                padding: 10px 18px;
+                gap: 10px;
+            }
+            .badge-counter .value {
+                font-size: 32px;
+            }
+            .badge-counter .label {
+                font-size: 13px;
+            }
+            .scene-wrap {
+                height: 300px;
+                margin: 10px 12px 0;
+            }
+            .state {
+                width: 220px;
+                padding: 18px 14px;
+            }
+            .state-cloud {
+                width: 170px;
+                height: 170px;
+                font-size: 26px;
+            }
+            .src-row,
+            .res-row {
+                height: 24px;
+                padding: 0 8px;
+            }
+            .src-row .bar:first-child,
+            .res-row .bars span:first-child {
+                width: 30px;
+            }
+            .src-row .bar:last-child,
+            .res-row .bars span:last-child {
+                width: 50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .scene-wrap {
+                height: 240px;
+            }
+            .state {
+                width: 180px;
+                padding: 14px 10px;
+            }
+            .state-cloud {
+                width: 130px;
+                height: 130px;
+                font-size: 20px;
+            }
+            .src-row,
+            .res-row {
+                height: 20px;
+                padding: 0 6px;
+                font-size: 10px;
+            }
+            .src-row .bar:first-child,
+            .res-row .bars span:first-child {
+                width: 22px;
+            }
+            .src-row .bar:last-child,
+            .res-row .bars span:last-child {
+                width: 36px;
+            }
+            .src-row .bar,
+            .res-row .bars span {
+                height: 4px;
+            }
+            .badge-counter .value {
+                font-size: 26px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- navigation -->
+        <nav class="nav">
+            <a href="{{ url_for('analytics') }}" class="primary">
+                <span class="nav-icon">←</span> Вернуться к аналитике
+            </a>
+            <a href="{{ url_for('data') }}">
+                <span class="nav-icon">▥</span> Открыть данные
+            </a>
+            <a href="{{ url_for('index') }}">
+                <span class="nav-icon">⌂</span> На главную
+            </a>
+        </nav>
+
+        <main class="card">
+
+            <!-- header -->
+            <header class="header">
+                <div class="icon-ring">
+                    <div class="check-mark"></div>
+                </div>
+                <h1>Удаление завершено!</h1>
+                <p class="sub">Операция выполнена успешно.</p>
+                <div class="badge-counter">
+                    <span class="label">Удалено строк:</span>
+                    <span class="value">{{ deleted_count }}</span>
+                </div>
+            </header>
+
+            <!-- central scene -->
+            <section class="scene-wrap">
+                <div class="scene">
+                    <div class="glow-bg"></div>
+
+                    <!-- состояние 1: исходные данные -->
+                    <div class="state state-source">
+                        <div class="tag">исходные данные</div>
+                        <div class="src-rows">
+                            <div class="src-row"><span class="bar"></span><span class="bar"></span></div>
+                            <div class="src-row dirty"><span class="bar"></span><span class="bar"></span><span class="badge-x">×</span></div>
+                            <div class="src-row"><span class="bar"></span><span class="bar"></span></div>
+                            <div class="src-row dirty"><span class="bar"></span><span class="bar"></span><span class="badge-x">×</span></div>
+                            <div class="src-row dirty"><span class="bar"></span><span class="bar"></span><span class="badge-x">×</span></div>
+                        </div>
+                    </div>
+
+                    <!-- состояние 2: облако -->
+                    <div class="state state-cloud">Вжухх, магия</div>
+
+                    <!-- состояние 3: чистые данные -->
+                    <div class="state state-result">
+                        <div class="tag">чистые данные</div>
+                        <div class="res-rows">
+                            <div class="res-row">
+                                <div class="bars"><span></span><span></span></div>
+                                <span class="check">✓</span>
+                            </div>
+                            <div class="res-row">
+                                <div class="bars"><span></span><span></span></div>
+                                <span class="check">✓</span>
+                            </div>
+                            <div class="res-row">
+                                <div class="bars"><span></span><span></span></div>
+                                <span class="check">✓</span>
+                            </div>
+                            <div class="res-row">
+                                <div class="bars"><span></span><span></span></div>
+                                <span class="check">✓</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+    </div>
+</body>
+</html>
