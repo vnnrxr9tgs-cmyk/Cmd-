@@ -83,13 +83,16 @@ def emoji_font(size=12, bold=False):
     f.setBold(bold)
     return f
 
-SIDEBAR_WIDTH = 500
-CARD_RADIUS = 12
-FONT_SIZE_TITLE = 13
-FONT_SIZE_CHANNEL = 11
-FONT_SIZE_SMALL = 9
-CHANNEL_HEIGHT = 120
+SIDEBAR_WIDTH = 520
+CARD_RADIUS = 16
+FONT_SIZE_TITLE = 14
+FONT_SIZE_CHANNEL = 12
+FONT_SIZE_SMALL = 10
+CHANNEL_HEIGHT = 130
 PAGE_SIZE = 10
+SHADOW_COLOR_DARK = "#0a0f18"
+SHADOW_COLOR_LIGHT = "#b8c2d1"
+ANIMATION_DURATION = 200
 
 # ---------------------------------------------------------------------------
 # Themes
@@ -98,64 +101,70 @@ PAGE_SIZE = 10
 
 class DarkTheme:
     name = "dark"
-    WINDOW = "#17212b"
-    SIDEBAR = "#17212b"
-    HEADER = "#17212b"
-    CARD = "#1a2533"
-    CARD_HOVER = "#223041"
-    CARD_ACTIVE = "#2a3b4f"
-    CARD_UNREAD = "#182331"
-    NEWS_CARD = "#232e3c"
-    NEWS_CARD_HOVER = "#2b3744"
-    NEWS_CARD_GRAD_TOP = "#3a4553"
-    NEWS_CARD_GRAD_BOTTOM = "#232e3c"
-    BORDER = "#0e1621"
-    TEXT = "#e4e8ee"
-    SUBTEXT = "#8b9aab"
-    BLUE = "#5288c1"
-    RED = "#e64a4a"
-    UNREAD_BADGE = "#5288c1"
+    WINDOW = "#0f141b"
+    SIDEBAR = "#0f141b"
+    HEADER = "#0f141b"
+    CARD = "#1a232e"
+    CARD_HOVER = "#243142"
+    CARD_ACTIVE = "#2d3d52"
+    CARD_UNREAD = "#16202d"
+    NEWS_CARD = "#1e2a38"
+    NEWS_CARD_HOVER = "#273546"
+    NEWS_CARD_GRAD_TOP = "#2a3849"
+    NEWS_CARD_GRAD_BOTTOM = "#1e2a38"
+    BORDER = "#1c2a3d"
+    TEXT = "#e8ecf1"
+    SUBTEXT = "#7a8899"
+    BLUE = "#4a9eff"
+    RED = "#ff5252"
+    UNREAD_BADGE = "#4a9eff"
     AVATAR_COLORS = [
-        "#e17076", "#7bc862", "#65aadd", "#a695e7", "#ee7aae",
-        "#6ec9cb", "#faa774", "#9aa66b", "#d09b6a", "#b8869a",
+        "#ff6b6b", "#51cf66", "#339af0", "#a78bfa", "#ff7eb9",
+        "#22d3ee", "#ffb84d", "#94b96a", "#d4a574", "#c994a8",
     ]
-    TOAST_GRAD_TOP = "#2b3744"
-    TOAST_GRAD_BOTTOM = "#17212b"
-    SCROLL_HANDLE = "#5a6275"
-    SCROLL_HANDLE_HOVER = "#6f7b8c"
-    BG_GRAD_TOP = "#1e2a36"
-    BG_GRAD_BOTTOM = "#1c2733"
+    TOAST_GRAD_TOP = "#273546"
+    TOAST_GRAD_BOTTOM = "#0f141b"
+    SCROLL_HANDLE = "#4a5568"
+    SCROLL_HANDLE_HOVER = "#5a6b80"
+    BG_GRAD_TOP = "#161f2b"
+    BG_GRAD_BOTTOM = "#0f141b"
+    SHADOW = "#0a0f18"
+    ACCENT_GRAD_START = "#4a9eff"
+    ACCENT_GRAD_END = "#7bb3ff"
 
 
 class LightTheme:
     name = "light"
-    WINDOW = "#f0f2f5"
+    WINDOW = "#f5f7fa"
     SIDEBAR = "#ffffff"
     HEADER = "#ffffff"
     CARD = "#ffffff"
-    CARD_HOVER = "#e8eef5"
-    CARD_ACTIVE = "#d6e4f5"
-    CARD_UNREAD = "#eef4fb"
+    CARD_HOVER = "#f0f4f8"
+    CARD_ACTIVE = "#e3ebf3"
+    CARD_UNREAD = "#f0f6fc"
     NEWS_CARD = "#ffffff"
-    NEWS_CARD_HOVER = "#f5f8fc"
+    NEWS_CARD_HOVER = "#f7fafd"
     NEWS_CARD_GRAD_TOP = "#ffffff"
-    NEWS_CARD_GRAD_BOTTOM = "#f4f7fb"
-    BORDER = "#d1d9e3"
-    TEXT = "#1a2332"
-    SUBTEXT = "#6b7a8d"
-    BLUE = "#2b7cd3"
-    RED = "#d94040"
-    UNREAD_BADGE = "#2b7cd3"
+    NEWS_CARD_GRAD_BOTTOM = "#f2f6fb"
+    BORDER = "#dbe2ea"
+    TEXT = "#1a2029"
+    SUBTEXT = "#64748b"
+    BLUE = "#3b82f6"
+    RED = "#ef4444"
+    UNREAD_BADGE = "#3b82f6"
     AVATAR_COLORS = [
-        "#e17076", "#7bc862", "#65aadd", "#a695e7", "#ee7aae",
-        "#6ec9cb", "#faa774", "#9aa66b", "#d09b6a", "#b8869a",
+        "#ff6b6b", "#51cf66", "#339af0", "#a78bfa", "#ff7eb9",
+        "#22d3ee", "#ffb84d", "#94b96a", "#d4a574", "#c994a8",
     ]
     TOAST_GRAD_TOP = "#ffffff"
-    TOAST_GRAD_BOTTOM = "#eef2f7"
-    SCROLL_HANDLE = "#b0b8c4"
-    SCROLL_HANDLE_HOVER = "#8e98a8"
-    BG_GRAD_TOP = "#f5f7fa"
-    BG_GRAD_BOTTOM = "#eef1f5"
+    TOAST_GRAD_BOTTOM = "#f2f6fb"
+    SCROLL_HANDLE = "#cbd5e1"
+    SCROLL_HANDLE_HOVER = "#94a3b8"
+    BG_GRAD_TOP = "#fafbfc"
+    BG_GRAD_BOTTOM = "#f5f7fa"
+    SHADOW = "#b8c2d1"
+    ACCENT_GRAD_START = "#3b82f6"
+    ACCENT_GRAD_END = "#60a5fa"
 
 
 Theme = DarkTheme
@@ -192,13 +201,30 @@ def draw_avatar(painter: QPainter, rect: QRect, text: str):
     painter.save()
     painter.setRenderHint(QPainter.Antialiasing, True)
     idx = int(hashlib.md5(text.encode()).hexdigest(), 16) % len(Theme.AVATAR_COLORS)
-    painter.setBrush(QColor(Theme.AVATAR_COLORS[idx]))
+    
+    # Градиент для аватара
+    gradient = QRadialGradient(rect.center().x(), rect.center().y(), rect.width() * 0.7)
+    gradient.setColorAt(0, QColor(Theme.AVATAR_COLORS[idx]))
+    gradient.setColorAt(1, QColor(Theme.AVATAR_COLORS[(idx + 2) % len(Theme.AVATAR_COLORS)]))
+    painter.setBrush(QBrush(gradient))
     painter.setPen(Qt.NoPen)
-    painter.drawEllipse(rect)
+    
+    # Тень для аватара
+    if hasattr(Theme, 'SHADOW'):
+        shadow_path = QPainterPath()
+        shadow_path.addEllipse(rect.adjusted(2, 2, -2, -2))
+        painter.setBrush(QColor(Theme.SHADOW))
+        painter.setOpacity(0.3)
+        painter.drawPath(shadow_path)
+        painter.setOpacity(1.0)
+    
+    painter.setBrush(gradient)
+    painter.drawEllipse(rect.adjusted(1, 1, -1, -1))
+    
     words = text.split()
-    letters = words[0][:2].upper() if len(words) == 1 else (words[0][0] + words[1][0]).upper()
-    painter.setPen(Qt.white)
-    painter.setFont(font_s(int(rect.height() * 0.30), True))
+    letters = words[0][:2].upper() if len(words) == 1 else (words[0][0] + words[-1][0]).upper()
+    painter.setPen(QColor("#ffffff"))
+    painter.setFont(font_s(int(rect.height() * 0.32), True))
     painter.drawText(rect, Qt.AlignCenter, letters)
     painter.restore()
 
@@ -975,39 +1001,47 @@ class ChannelDelegate(QStyledItemDelegate):
         unread = channel.unread_count
         painter.save()
         painter.setRenderHint(QPainter.Antialiasing, True)
-        rect = option.rect.adjusted(4, 4, -4, -4)
+        rect = option.rect.adjusted(6, 6, -6, -6)
+        
+        # Градиент фона карточки канала
+        bg_gradient = QLinearGradient(rect.topLeft(), rect.bottomRight())
         if selected:
-            bg = Theme.CARD_ACTIVE
+            bg_gradient.setColorAt(0, QColor(Theme.CARD_ACTIVE))
+            bg_gradient.setColorAt(1, QColor(Theme.CARD))
         elif hover:
-            bg = Theme.CARD_HOVER
+            bg_gradient.setColorAt(0, QColor(Theme.CARD_HOVER))
+            bg_gradient.setColorAt(1, QColor(Theme.CARD))
         elif unread > 0:
-            bg = Theme.CARD_UNREAD
+            bg_gradient.setColorAt(0, QColor(Theme.CARD_UNREAD))
+            bg_gradient.setColorAt(1, QColor(Theme.CARD))
         else:
-            bg = Theme.CARD
-        painter.setBrush(QColor(bg))
+            bg_gradient.setColorAt(0, QColor(Theme.CARD))
+            bg_gradient.setColorAt(1, QColor(Theme.CARD))
+        
+        painter.setBrush(QBrush(bg_gradient))
         painter.setPen(Qt.NoPen)
         painter.drawRoundedRect(rect, CARD_RADIUS, CARD_RADIUS)
         painter.restore()
 
-        av = QRect(rect.left() + 56, rect.top() + (rect.height() - 42) // 2, 42, 42)
+        av = QRect(rect.left() + 58, rect.top() + (rect.height() - 46) // 2, 46, 46)
         draw_avatar(painter, av, channel.name)
-        painter.setFont(font_s(10))
+        painter.setFont(font_s(11))
         painter.setPen(QColor(Theme.TEXT if channel.notify_enabled else Theme.SUBTEXT))
-        painter.drawText(QRect(rect.left() + 14, rect.top() + 16, 24, 24), Qt.AlignCenter,
+        painter.drawText(QRect(rect.left() + 12, rect.top() + 14, 28, 28), Qt.AlignCenter,
                          "🔔" if channel.notify_enabled else "🔕")
         painter.setPen(QColor(Theme.TEXT if channel.sound_enabled else Theme.SUBTEXT))
-        painter.drawText(QRect(rect.left() + 14, rect.bottom() - 36, 24, 24), Qt.AlignCenter,
+        painter.drawText(QRect(rect.left() + 12, rect.bottom() - 40, 28, 28), Qt.AlignCenter,
                          "🔊" if channel.sound_enabled else "🔇")
 
-        time_r = QRect(rect.right() - 70, rect.top() + 8, 60, 16)
-        name_r = QRect(av.right() + 12, rect.top() + 8, time_r.left() - av.right() - 20, 20)
+        time_r = QRect(rect.right() - 75, rect.top() + 10, 65, 18)
+        name_r = QRect(av.right() + 14, rect.top() + 10, time_r.left() - av.right() - 24, 22)
         painter.setPen(QColor(Theme.TEXT))
         painter.setFont(font_s(FONT_SIZE_CHANNEL, True))
         painter.drawText(name_r, Qt.AlignLeft | Qt.AlignVCenter,
                          painter.fontMetrics().elidedText(channel.name, Qt.ElideRight, name_r.width()))
         painter.setPen(QColor(Theme.SUBTEXT))
         painter.setFont(font_s(FONT_SIZE_SMALL))
-        prev = QRect(name_r.left(), name_r.bottom() + 4, rect.right() - name_r.left() - 12, 50)
+        prev = QRect(name_r.left(), name_r.bottom() + 6, rect.right() - name_r.left() - 16, 54)
         fm = painter.fontMetrics()
         lines = [fm.elidedText(l, Qt.ElideRight, prev.width()) for l in (channel.last_news or "").split("\n")]
         max_l = max(1, prev.height() // fm.height())
@@ -1016,17 +1050,23 @@ class ChannelDelegate(QStyledItemDelegate):
             if lines:
                 lines[-1] = fm.elidedText(lines[-1], Qt.ElideRight, prev.width() - fm.width("…")) + "…"
         painter.drawText(prev, Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap, "\n".join(lines))
-        painter.setFont(font_s(8))
+        painter.setFont(font_s(9))
         painter.drawText(time_r, Qt.AlignRight | Qt.AlignVCenter, human_time(channel.last_date))
         if unread > 0:
+            # Улучшенный индикатор непрочитанных
+            indicator_rect = QRect(rect.left() + 6, rect.top() + 18, 5, rect.height() - 36)
             painter.setBrush(QColor(Theme.BLUE))
             painter.setPen(Qt.NoPen)
-            painter.drawRoundedRect(QRect(rect.left() + 4, rect.top() + 15, 4, rect.height() - 30), 2, 2)
-            b = QRect(rect.right() - 24, rect.bottom() - 24, 20, 20)
-            painter.setBrush(QColor(Theme.UNREAD_BADGE))
+            painter.drawRoundedRect(indicator_rect, 3, 3)
+            
+            b = QRect(rect.right() - 28, rect.bottom() - 28, 24, 24)
+            badge_gradient = QRadialGradient(b.center().x(), b.center().y(), b.width() * 0.6)
+            badge_gradient.setColorAt(0, QColor(Theme.UNREAD_BADGE))
+            badge_gradient.setColorAt(1, QColor(Theme.BLUE))
+            painter.setBrush(QBrush(badge_gradient))
             painter.drawEllipse(b)
             painter.setPen(Qt.white)
-            painter.setFont(font_s(9, True))
+            painter.setFont(font_s(10, True))
             painter.drawText(b, Qt.AlignCenter, str(unread))
 
     def sizeHint(self, option, index):
@@ -1046,11 +1086,13 @@ class NewsDelegate(QStyledItemDelegate):
         hover = option.state & QStyle.State_MouseOver
         painter.save()
         painter.setRenderHint(QPainter.Antialiasing, True)
-        rect = option.rect.adjusted(6, 6, -6, -6)
+        rect = option.rect.adjusted(8, 8, -8, -8)
+        
+        # Градиент фона карточки новости с улучшенным эффектом
         g = QLinearGradient(rect.topLeft(), rect.bottomRight())
         if hover:
             g.setColorAt(0, QColor(Theme.NEWS_CARD_HOVER))
-            g.setColorAt(1, QColor(Theme.NEWS_CARD))
+            g.setColorAt(1, QColor(Theme.NEWS_CARD_GRAD_BOTTOM))
         else:
             g.setColorAt(0, QColor(Theme.NEWS_CARD_GRAD_TOP))
             g.setColorAt(1, QColor(Theme.NEWS_CARD_GRAD_BOTTOM))
@@ -1059,50 +1101,61 @@ class NewsDelegate(QStyledItemDelegate):
         painter.drawRoundedRect(rect, CARD_RADIUS, CARD_RADIUS)
         painter.restore()
 
-        top = QRect(rect.left() + 16, rect.top() + 12, rect.width() - 32, 34)
-        av = QRect(top.left(), top.top(), 34, 34)
+        top = QRect(rect.left() + 20, rect.top() + 16, rect.width() - 40, 38)
+        av = QRect(top.left(), top.top(), 38, 38)
         draw_avatar(painter, av, news.channel)
+        
+        # Название канала с градиентом
+        channel_rect = QRect(av.right() + 12, top.top() + 10, 180, 22)
         painter.setPen(QColor(Theme.TEXT))
         painter.setFont(font_s(FONT_SIZE_CHANNEL, True))
-        painter.drawText(QRect(av.right() + 10, top.top() + 8, 200, 20), Qt.AlignLeft | Qt.AlignVCenter, news.channel)
-        painter.setPen(QColor(Theme.SUBTEXT))
-        painter.setFont(font_s(FONT_SIZE_SMALL))
-        painter.drawText(QRect(top.right() - 100, top.top() + 8, 90, 20), Qt.AlignRight | Qt.AlignVCenter, human_time(news.date))
-
-        if news.title:
-            tr = QRect(rect.left() + 16, top.bottom() + 18, rect.width() - 32, 30)
-            painter.setPen(QColor(Theme.TEXT))
-            painter.setFont(font_s(self.font_size + 2, True))
-            painter.drawText(tr, Qt.AlignLeft | Qt.AlignTop,
-                             painter.fontMetrics().elidedText(news.title, Qt.ElideRight, tr.width()))
-            body_top = tr.bottom() + 26
-        else:
-            body_top = top.bottom() + 8
-        date_y = rect.bottom() - 10 - 18
-        body = QRect(rect.left() + 16, body_top, rect.width() - 32, max(0, date_y - 2 - body_top))
-        painter.setPen(QColor(Theme.TEXT))
-        painter.setFont(font_s(self.font_size))
-        painter.drawText(body, Qt.AlignJustify | Qt.AlignTop | Qt.TextWordWrap, news.text)
+        painter.drawText(channel_rect, Qt.AlignLeft | Qt.AlignVCenter, 
+                         painter.fontMetrics().elidedText(news.channel, Qt.ElideRight, channel_rect.width()))
+        
+        # Время публикации
+        time_rect = QRect(top.right() - 90, top.top() + 10, 80, 22)
         painter.setPen(QColor(Theme.SUBTEXT))
         painter.setFont(font_s(FONT_SIZE_SMALL - 1))
-        painter.drawText(QRect(rect.left() + 16, date_y, rect.width() - 32, 18), Qt.AlignLeft | Qt.AlignVCenter, news.date)
+        painter.drawText(time_rect, Qt.AlignRight | Qt.AlignVCenter, human_time(news.date))
+
+        if news.title:
+            tr = QRect(rect.left() + 20, top.bottom() + 20, rect.width() - 40, 36)
+            painter.setPen(QColor(Theme.TEXT))
+            painter.setFont(font_s(self.font_size + 3, True))
+            painter.drawText(tr, Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap,
+                             painter.fontMetrics().elidedText(news.title, Qt.ElideRight, tr.width()))
+            body_top = tr.bottom() + 28
+        else:
+            body_top = top.bottom() + 12
+            
+        date_y = rect.bottom() - 12 - 20
+        body = QRect(rect.left() + 20, body_top, rect.width() - 40, max(0, date_y - 4 - body_top))
+        painter.setPen(QColor(Theme.TEXT))
+        painter.setFont(font_s(self.font_size + 1))
+        painter.drawText(body, Qt.AlignJustify | Qt.AlignTop | Qt.TextWordWrap, news.text)
+        
+        # Дата с иконкой календаря
+        painter.setPen(QColor(Theme.SUBTEXT))
+        painter.setFont(font_s(FONT_SIZE_SMALL - 1))
+        date_rect = QRect(rect.left() + 20, date_y, rect.width() - 40, 20)
+        painter.drawText(date_rect, Qt.AlignLeft | Qt.AlignVCenter, f"📅 {news.date}")
 
     def sizeHint(self, option, index):
         news = index.data(Qt.UserRole)
         if not news:
-            return QSize(option.rect.width(), 120)
+            return QSize(option.rect.width(), 140)
         w = max(100, option.rect.width())
         key = f"{news.cs()}:{w}:{self.font_size}"
         if key in self._cache:
             return QSize(w, self._cache[key])
-        fm = QFontMetrics(font_s(self.font_size))
-        bh = fm.boundingRect(QRect(0, 0, w - 32, 10000), Qt.TextWordWrap | Qt.AlignJustify, news.text).height()
+        fm = QFontMetrics(font_s(self.font_size + 1))
+        bh = fm.boundingRect(QRect(0, 0, w - 40, 10000), Qt.TextWordWrap | Qt.AlignJustify, news.text).height()
         th = 0
         if news.title:
-            th = QFontMetrics(font_s(self.font_size + 2, True)).boundingRect(
-                QRect(0, 0, w - 32, 100), Qt.TextWrapAnywhere | Qt.AlignLeft, news.title
+            th = QFontMetrics(font_s(self.font_size + 3, True)).boundingRect(
+                QRect(0, 0, w - 40, 100), Qt.TextWrapAnywhere | Qt.AlignLeft, news.title
             ).height()
-        h = max(100, 12 + 34 + 18 + th + (26 if news.title else 0) + bh + 28 + 20 + 10 + 8)
+        h = max(120, 16 + 38 + 24 + th + (32 if news.title else 0) + bh + 32 + 24 + 12 + 10)
         self._cache[key] = h
         if len(self._cache) > 600:
             self._cache.clear()
@@ -1127,11 +1180,24 @@ class Sidebar(QFrame):
         self.setFixedWidth(SIDEBAR_WIDTH)
         self._style()
         lay = QVBoxLayout(self)
-        lay.setContentsMargins(14, 16, 14, 14)
-        self.title = QLabel("КАНАЛЫ")
-        self.title.setFont(font_s(12, True))
-        self.title.setStyleSheet(f"color: {Theme.BLUE};")
-        lay.addWidget(self.title)
+        lay.setContentsMargins(16, 20, 16, 16)
+        lay.setSpacing(12)
+        
+        # Заголовок с улучшенным оформлением
+        header_widget = QWidget()
+        header_layout = QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(8, 8, 8, 8)
+        self.title = QLabel("📰 КАНАЛЫ")
+        self.title.setFont(font_s(13, True))
+        self.title.setStyleSheet(f"""
+            color: {Theme.BLUE};
+            background: transparent;
+            padding: 4px;
+        """)
+        header_layout.addWidget(self.title)
+        header_layout.addStretch()
+        lay.addWidget(header_widget)
+        
         self.list = QListView()
         self.list.setFrameShape(QFrame.NoFrame)
         self.list.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
@@ -1150,23 +1216,51 @@ class Sidebar(QFrame):
 
     def _style(self):
         self.setStyleSheet(f"""
-            QFrame {{ background: qlineargradient(x1:0,y1:0,x2:1,y2:1,
-                stop:0 {Theme.SIDEBAR}, stop:1 {Theme.WINDOW});
-                border: none; border-right: 1px solid {Theme.BORDER}; border-radius: 16px; }}
+            QFrame {{ 
+                background: qlineargradient(x1:0,y1:0,x2:1,y2:1,
+                    stop:0 {Theme.SIDEBAR}, stop:1 {Theme.WINDOW});
+                border: none; 
+                border-right: 1px solid {Theme.BORDER}; 
+                border-radius: 0px;
+            }}
         """)
 
     def _list_style(self):
         self.list.setStyleSheet(f"""
-            QListView {{ background: transparent; border: none; }}
-            QScrollBar:vertical {{ width: 12px; background: transparent; }}
-            QScrollBar::handle:vertical {{ background: {Theme.SCROLL_HANDLE}; border-radius: 6px; min-height: 30px; }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
+            QListView {{ 
+                background: transparent; 
+                border: none;
+                padding: 4px;
+            }}
+            QScrollBar:vertical {{ 
+                width: 14px; 
+                background: transparent; 
+                border-radius: 7px;
+            }}
+            QScrollBar::handle:vertical {{ 
+                background: {Theme.SCROLL_HANDLE}; 
+                border-radius: 7px; 
+                min-height: 40px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background: {Theme.SCROLL_HANDLE_HOVER};
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ 
+                height: 0; 
+            }}
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+                background: transparent;
+            }}
         """)
 
     def apply_theme(self):
         self._style()
         self._list_style()
-        self.title.setStyleSheet(f"color: {Theme.BLUE};")
+        self.title.setStyleSheet(f"""
+            color: {Theme.BLUE};
+            background: transparent;
+            padding: 4px;
+        """)
         self.list.viewport().update()
 
     def setChannels(self, channels):
@@ -1189,11 +1283,27 @@ class Sidebar(QFrame):
         if not ch:
             return
         menu = QMenu()
-        menu.setStyleSheet(f"QMenu {{ background: {Theme.CARD}; color: {Theme.TEXT}; border: 1px solid {Theme.BORDER}; border-radius: 10px; padding: 6px; }} QMenu::item:selected {{ background: {Theme.CARD_ACTIVE}; }}")
+        menu.setStyleSheet(f"""
+            QMenu {{ 
+                background: {Theme.CARD}; 
+                color: {Theme.TEXT}; 
+                border: 1px solid {Theme.BORDER}; 
+                border-radius: 12px; 
+                padding: 8px;
+            }}
+            QMenu::item:selected {{ 
+                background: {Theme.CARD_ACTIVE};
+                border-radius: 6px;
+                padding: 6px 12px;
+            }}
+            QMenu::item:checked {{
+                color: {Theme.BLUE};
+            }}
+        """)
         for label, field, val in (
-            ("Показывать", "show", self.storage.settings.is_show(ch.name)),
-            ("Трей уведомление", "notify", ch.notify_enabled),
-            ("Звук", "sound", ch.sound_enabled),
+            ("👁 Показывать", "show", self.storage.settings.is_show(ch.name)),
+            ("🔔 Трей уведомление", "notify", ch.notify_enabled),
+            ("🔊 Звук", "sound", ch.sound_enabled),
         ):
             a = QAction(label, self)
             a.setCheckable(True)
@@ -1232,52 +1342,77 @@ class MainContent(QWidget):
         super().__init__()
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
-        lay.setSpacing(6)
+        lay.setSpacing(8)
         self.header = QFrame()
-        self.header.setFixedHeight(64)
+        self.header.setFixedHeight(70)
         self._hdr()
         hl = QHBoxLayout(self.header)
-        hl.setContentsMargins(24, 12, 24, 12)
+        hl.setContentsMargins(28, 14, 28, 14)
+        
+        # Заголовок канала с иконкой
+        header_layout = QVBoxLayout()
+        header_layout.setSpacing(2)
         self.channel_title = QLabel("Каналы")
-        self.channel_title.setFont(font_s(FONT_SIZE_TITLE, True))
+        self.channel_title.setFont(font_s(FONT_SIZE_TITLE + 2, True))
         self.channel_title.setStyleSheet(f"color: {Theme.TEXT};")
-        hl.addWidget(self.channel_title)
-        self.count_label = QLabel("0")
+        header_layout.addWidget(self.channel_title)
+        
+        self.count_label = QLabel("0 новостей")
+        self.count_label.setFont(font_s(FONT_SIZE_SMALL))
         self.count_label.setStyleSheet(f"color: {Theme.SUBTEXT};")
-        hl.addWidget(self.count_label)
+        header_layout.addWidget(self.count_label)
+        
+        hl.addLayout(header_layout)
         hl.addStretch()
+        
         self.search = QLineEdit()
-        self.search.setPlaceholderText("Поиск...")
-        self.search.setFixedWidth(240)
-        self.search.setMinimumHeight(36)
+        self.search.setPlaceholderText("🔍 Поиск...")
+        self.search.setFixedWidth(260)
+        self.search.setMinimumHeight(40)
         self._search_style()
         self.search.textChanged.connect(self.searchRequested)
         hl.addWidget(self.search)
-        self.ai_btn = self._btn("ИИ")
+        
+        # Группа кнопок с улучшенным стилем
+        btn_container = QWidget()
+        btn_layout = QHBoxLayout(btn_container)
+        btn_layout.setContentsMargins(0, 0, 0, 0)
+        btn_layout.setSpacing(8)
+        
+        self.ai_btn = self._btn("🤖")
         self.ai_btn.setToolTip("Режим ИИ")
-        self.ai_btn.setMinimumWidth(34)
-        self.ai_btn.setMaximumWidth(34)
+        self.ai_btn.setMinimumWidth(42)
+        self.ai_btn.setMaximumWidth(42)
         self.ai_btn.clicked.connect(self.aiRequested.emit)
-        hl.addWidget(self.ai_btn)
+        btn_layout.addWidget(self.ai_btn)
+        
         self.refresh_btn = self._btn("⟳")
         self.refresh_btn.setToolTip("Обновить")
+        self.refresh_btn.setMinimumWidth(42)
+        self.refresh_btn.setMaximumWidth(42)
         self.refresh_btn.clicked.connect(self.refreshRequested)
-        hl.addWidget(self.refresh_btn)
+        btn_layout.addWidget(self.refresh_btn)
+        
         self.mark_all_btn = self._btn("✓✓")
         self.mark_all_btn.setToolTip("Отметить все новости прочитанными")
         self.mark_all_btn.setFont(font_s(10, True))
         self.mark_all_btn.clicked.connect(self.markAllReadRequested.emit)
-        hl.addWidget(self.mark_all_btn)
+        btn_layout.addWidget(self.mark_all_btn)
+        
         self.sound_btn = self._btn("")
         self.sound_btn.clicked.connect(self.soundToggleRequested.emit)
-        hl.addWidget(self.sound_btn)
+        btn_layout.addWidget(self.sound_btn)
         self.set_sound_icon(sound_enabled)
+        
         self.theme_btn = self._btn("☀" if Theme.name == "dark" else "🌙")
         self.theme_btn.clicked.connect(self.themeToggleRequested.emit)
-        hl.addWidget(self.theme_btn)
+        btn_layout.addWidget(self.theme_btn)
+        
         self.settings_btn = self._btn("⚙")
         self.settings_btn.clicked.connect(self.settingsRequested)
-        hl.addWidget(self.settings_btn)
+        btn_layout.addWidget(self.settings_btn)
+        
+        hl.addWidget(btn_container)
         lay.addWidget(self.header)
 
         self.news_list = QListView()
@@ -1299,46 +1434,99 @@ class MainContent(QWidget):
 
         self.placeholder = QLabel("Выберите канал или настройте подключение к SQL Server")
         self.placeholder.setAlignment(Qt.AlignCenter)
-        self.placeholder.setFont(font_s(14, True))
-        self.placeholder.setStyleSheet(f"color: {Theme.SUBTEXT};")
+        self.placeholder.setFont(font_s(16, True))
+        self.placeholder.setStyleSheet(f"""
+            color: {Theme.SUBTEXT};
+            background: transparent;
+            padding: 20px;
+        """)
         self.placeholder.hide()
         lay.addWidget(self.placeholder)
         self._loading = False
 
     def _btn(self, t):
         b = QPushButton(t)
-        # Компактные кнопки: ИИ/обновление не должны занимать лишнее место
-        # в заголовке даже при увеличенном системном шрифте.
-        b.setFixedSize(34, 34)
+        b.setFixedSize(42, 42)
         b.setCursor(Qt.PointingHandCursor)
-        b.setFont(font_s(12 if t == "ИИ" else 14, t == "ИИ"))
+        b.setFont(font_s(14, True))
         b.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        b.setAttribute(Qt.WA_LayoutUsesWidgetAttributes)
         self._btn_style(b)
         return b
 
     def _btn_style(self, b):
         b.setStyleSheet(f"""
-            QPushButton {{ background: {Theme.CARD}; border: 1px solid {Theme.BORDER};
-                border-radius: 18px; color: {Theme.TEXT}; }}
-            QPushButton:hover {{ background: {Theme.CARD_HOVER}; }}
+            QPushButton {{ 
+                background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+                    stop:0 {Theme.CARD}, stop:1 {Theme.CARD_GRAD_BOTTOM if hasattr(Theme, 'CARD_GRAD_BOTTOM') else Theme.CARD});
+                border: 1px solid {Theme.BORDER};
+                border-radius: 21px; 
+                color: {Theme.TEXT};
+                padding: 4px;
+            }}
+            QPushButton:hover {{ 
+                background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+                    stop:0 {Theme.CARD_HOVER}, stop:1 {Theme.CARD});
+                border: 1px solid {Theme.BLUE};
+            }}
+            QPushButton:pressed {{
+                background: {Theme.CARD_ACTIVE};
+            }}
         """)
 
     def _hdr(self):
-        self.header.setStyleSheet(f"QFrame {{ background: {Theme.HEADER}; border-bottom: 1px solid {Theme.BORDER}; }}")
+        self.header.setStyleSheet(f"""
+            QFrame {{ 
+                background: {Theme.HEADER}; 
+                border-bottom: 1px solid {Theme.BORDER};
+            }}
+        """)
 
     def _search_style(self):
         self.search.setStyleSheet(f"""
-            QLineEdit {{ background: {Theme.CARD}; color: {Theme.TEXT};
-                border: 1px solid {Theme.BORDER}; border-radius: 18px; padding: 0 16px; }}
-            QLineEdit:focus {{ border: 2px solid {Theme.BLUE}; }}
+            QLineEdit {{ 
+                background: {Theme.CARD}; 
+                color: {Theme.TEXT};
+                border: 1px solid {Theme.BORDER}; 
+                border-radius: 20px; 
+                padding: 0 20px;
+                font-size: 13px;
+            }}
+            QLineEdit:focus {{ 
+                border: 2px solid {Theme.BLUE};
+                background: {Theme.CARD_HOVER};
+            }}
+            QLineEdit::placeholder {{
+                color: {Theme.SUBTEXT};
+            }}
         """)
 
     def _list_style(self):
         self.news_list.setStyleSheet(f"""
-            QListView {{ background: transparent; border: none; }}
-            QScrollBar:vertical {{ width: 12px; background: transparent; }}
-            QScrollBar::handle:vertical {{ background: {Theme.SCROLL_HANDLE}; border-radius: 6px; min-height: 40px; }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
+            QListView {{ 
+                background: transparent; 
+                border: none;
+                padding: 8px;
+            }}
+            QScrollBar:vertical {{ 
+                width: 14px; 
+                background: transparent; 
+                border-radius: 7px;
+            }}
+            QScrollBar::handle:vertical {{ 
+                background: {Theme.SCROLL_HANDLE}; 
+                border-radius: 7px; 
+                min-height: 50px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background: {Theme.SCROLL_HANDLE_HOVER};
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ 
+                height: 0; 
+            }}
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+                background: transparent;
+            }}
         """)
 
     def apply_theme(self):
